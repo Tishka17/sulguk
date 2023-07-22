@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[project]
+name = "html2tg"
+version = "0.0.1"
+authors = [
+    { name = "Andrey Tikhonov", email = "17@itishka.org" },
+]
+description = "Comverter HTML to Telegram Entities"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "aiogram"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/tishka17/html2tg"
+"Bug Tracker" = "https://github.com/tishka17/html2tg/issues"
