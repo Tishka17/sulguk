@@ -153,6 +153,21 @@ class Group(Entity):
             self._add_soft_new_line(state)
         for entity in self.entities:
             entity.render(state)
+        if self.block:
+            self._add_soft_new_line(state)
+
+
+@dataclass
+class Paragraph(Group):
+    block: bool = True
+
+    def render(self, state: State) -> None:
+        self._add_soft_new_line(state)
+        if not state.text.endswith("\n\n"):
+            self._add_text(state, "\n")
+        super().render(state)
+        if not state.text.endswith("\n\n"):
+            self._add_text(state, "\n")
 
 
 @dataclass

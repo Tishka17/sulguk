@@ -5,6 +5,7 @@ from typing import List, Tuple, Optional
 from .entities import (
     Group, Entity, Text, Link, Bold, Italic,
     Strikethrough, Code, ListItem, ListGroup, NewLine, Spoiler,
+    Paragraph,
 )
 
 SPACES = re.compile(r"\s+")
@@ -82,6 +83,8 @@ class Transformer(HTMLParser):
             entity = self._get_span(attrs)
         elif tag in ("tg-spiler",):
             entity = Spoiler()
+        elif tag in ("p",):
+            entity = Paragraph()
         else:
             raise ValueError(f"Unsupported tag: {tag}")
         self.current.add(entity)
