@@ -13,14 +13,14 @@ from .wrapper import transform_html
 logger = logging.getLogger(__name__)
 
 
-class Html2TgMiddleware(BaseRequestMiddleware):
+class SulgukMiddleware(BaseRequestMiddleware):
     async def __call__(
             self,
             make_request: NextRequestMiddlewareType[TelegramType],
             bot: "Bot",
             method: TelegramMethod[TelegramType],
     ) -> Response[TelegramType]:
-        if getattr(method, "parse_mode", "") == "html2tg":
+        if getattr(method, "parse_mode", "") == "sulguk":
             if hasattr(method, "caption"):
                 result = transform_html(method.caption)
                 method.caption = result.text

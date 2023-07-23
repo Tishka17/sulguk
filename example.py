@@ -2,7 +2,7 @@ import asyncio
 import os
 
 from aiogram import Bot
-from html2tg import transform_html
+from sulguk import transform_html
 
 CHAT_ID = 1
 

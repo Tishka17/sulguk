@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 package-dir = { "" = "src" }
 
 [project]
-name = "html2tg"
+name = "sulguk"
 version = "0.0.1"
 authors = [
     { name = "Andrey Tikhonov", email = "17@itishka.org" },
@@ -23,5 +23,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/tishka17/html2tg"
-"Bug Tracker" = "https://github.com/tishka17/html2tg/issues"
+"Homepage" = "https://github.com/tishka17/sulguk"
+"Bug Tracker" = "https://github.com/tishka17/sulguk/issues"
