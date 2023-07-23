@@ -8,12 +8,21 @@ from .state import State
 
 
 class Entity(ABC):
-    def _add_text(self, state: State, text: str) -> None:
-        text = " " * state.indent + text
+    def _add_text(
+            self, state: State, text: str, with_indent: bool = False,
+    ) -> None:
         if not state.text:
             text = text.lstrip()
+        if state.text and state.text[-1].isspace():
+            text = text.lstrip(" ")
+        if with_indent:
+            text = " " * (state.indent * 4) + text
         state.text += text
-        state.offset += len(text)
+        state.offset += len(text.encode("utf-16-le")) // 2
+
+    def _add_soft_new_line(self, state: State):
+        if not state.text.endswith("\n"):
+            self._add_text(state, "\n")
 
     @abstractmethod
     def add(self, entity: "Entity"):
@@ -67,7 +76,7 @@ class Link(WithText):
             type="text_link",
             url=self.url,
             offset=offset,
-            length=length
+            length=length,
         )
 
 
@@ -112,6 +121,16 @@ class Strikethrough(WithText):
 
 
 @dataclass
+class Spoiler(WithText):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(
+            type="spoiler",
+            offset=offset,
+            length=length
+        )
+
+
+@dataclass
 class Code(WithText):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
@@ -124,36 +143,34 @@ class Code(WithText):
 @dataclass
 class Group(Entity):
     entities: List[Entity] = field(default_factory=list)
+    block: bool = False
 
     def add(self, entity: Entity):
         self.entities.append(entity)
 
     def render(self, state: State) -> None:
+        if self.block:
+            self._add_soft_new_line(state)
         for entity in self.entities:
             entity.render(state)
 
 
 @dataclass
-class ListGroup(Group):
-    indent: int = 2
+class ListGroup(Entity):
+    entities: List[Entity] = field(default_factory=list)
     numbered: bool = False
 
     def add(self, entity: Entity):
         if isinstance(entity, Text) and not (entity.text.strip()):
             return
-        super().add(entity)
+        self.entities.append(entity)
 
     def render(self, state: State) -> None:
-        indent = state.indent
+        self._add_soft_new_line(state)
         index = state.index
-        state.indent += self.indent
-        if not state.text.endswith("\n"):
-            self._add_text(state, "\n")
         for state.index, entity in enumerate(self.entities, 1):
-            print("index", self, state.index)
             entity.render(state)
-            self._add_text(state, "\n")
-        state.indent = indent
+            self._add_soft_new_line(state)
         state.index = index
 
 
@@ -163,7 +180,20 @@ class ListItem(Group):
 
     def render(self, state: State) -> None:
         if self.list.numbered:
-            self._add_text(state, str(state.index))
+            mark = f"{state.index}. "
         else:
-            self._add_text(state, "*")
+            mark = "* "
+        self._add_text(state, mark, with_indent=True)
+
+        indent = state.indent
+        state.indent += 1
         super().render(state)
+        state.indent = indent
+
+
+class NewLine(Entity):
+    def add(self, entity: "Entity"):
+        raise ValueError("Usupported contents for NewLine widget")
+
+    def render(self, state: State) -> None:
+        return self._add_text(state, "\n")

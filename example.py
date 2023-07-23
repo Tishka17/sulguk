@@ -1,21 +1,32 @@
+import asyncio
+import os
+
+from aiogram import Bot
 from html2tg import transform_html
 
-raw_html = """
-<a href="123">hello</a>
-test
-<b>bold</b><i>italic</i>
-<ol>
-<li>item1</li>
-<li>item2</li>
-</ol>
---
-<ul>
-<li>item1</li>
-<li>item2</li>
-</ul>
-"""
+CHAT_ID = 1
 
-result = transform_html(raw_html)
-print("Text:")
-print(result.text)
-print(result.entities)
+
+async def main():
+    with open("example.html") as f:
+        raw_html = f.read()
+    result = transform_html(raw_html)
+    print("Text:")
+    print(result.text)
+    for entity in result.entities:
+        print(repr(entity))
+    print()
+
+    bot = Bot(token=os.getenv("BOT_TOKEN"))
+    await bot.send_message(
+        chat_id=CHAT_ID,
+        text=raw_html,
+    )
+    await bot.send_message(
+        chat_id=CHAT_ID,
+        text=result.text,
+        entities=result.entities,
+    )
+
+
+asyncio.run(main())

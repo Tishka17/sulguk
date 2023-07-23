@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional
 
 from .entities import (
     Group, Entity, Text, Link, Bold, Italic,
-    Strikethrough, Code, ListItem, ListGroup,
+    Strikethrough, Code, ListItem, ListGroup, NewLine, Spoiler,
 )
 
 SPACES = re.compile(r"\s+")
@@ -26,7 +26,7 @@ class Transformer(HTMLParser):
         self.current.add(Text(SPACES.sub(" ", data)))
 
     def _find_attr(self, name: str, attrs: Attrs) -> Optional[str]:
-        return next((value for key, value in attrs if key == name), None)
+        return next((value for key, value in attrs if key == name), "")
 
     def _get_a(self, attrs: Attrs) -> Entity:
         url = self._find_attr("href", attrs)
@@ -44,16 +44,29 @@ class Transformer(HTMLParser):
     def _get_li(self, attrs: Attrs) -> Entity:
         return ListItem(list=self.current)
 
+    def _get_span(self, attrs: Attrs) -> Entity:
+        classes = self._find_attr("class", attrs).split()
+        if "tg-spoiler" in classes:
+            return Spoiler()
+        return Group()
+
+    def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
+        if tag == "br":
+            entity = NewLine()
+        else:
+            raise ValueError(f"Unsupported single tag: {tag}")
+        self.current.add(entity)
+
     def handle_starttag(
             self, tag: str, attrs: Attrs,
     ) -> None:
-        if tag == "ul":
+        if tag in ("ul",):
             entity = self._get_ul(attrs)
-        elif tag == "ol":
+        elif tag in ("ol",):
             entity = self._get_ol(attrs)
-        elif tag == "li":
+        elif tag in ("li",):
             entity = self._get_li(attrs)
-        elif tag == "a":
+        elif tag in ("a",):
             entity = self._get_a(attrs)
         elif tag in ("b", "strong"):
             entity = Bold()
@@ -63,6 +76,12 @@ class Transformer(HTMLParser):
             entity = Strikethrough()
         elif tag in ("code",):
             entity = Code()
+        elif tag in ("div",):
+            entity = Group(block=True)
+        elif tag in ("span",):
+            entity = self._get_span(attrs)
+        elif tag in ("tg-spiler",):
+            entity = Spoiler()
         else:
             raise ValueError(f"Unsupported tag: {tag}")
         self.current.add(entity)
