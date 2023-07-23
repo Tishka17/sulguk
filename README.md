@@ -1,4 +1,4 @@
-Sulguk - html to telegram entities converter
+Sulguk - HTML to telegram entities converter
 ================================================
 
 Need to deliver formatted content to your bot clients?
@@ -25,7 +25,7 @@ bot.session.middleware(SulgukMiddleware())
 ```
 
 3. Send it using `sulguk` as a `parse_mode`:
-```
+```python
 await bot.send_message(
     chat_id=CHAT_ID,
     text=raw_html,
