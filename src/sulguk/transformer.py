@@ -1,6 +1,6 @@
 import re
 from html.parser import HTMLParser
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Any
 
 from .entities import (
     Group, Entity, Text, Link, Bold, Italic,
@@ -26,8 +26,10 @@ class Transformer(HTMLParser):
     def handle_data(self, data: str) -> None:
         self.current.add(Text(SPACES.sub(" ", data)))
 
-    def _find_attr(self, name: str, attrs: Attrs) -> Optional[str]:
-        return next((value for key, value in attrs if key == name), "")
+    def _find_attr(
+            self, name: str, attrs: Attrs, default: Any = "",
+    ) -> Optional[str]:
+        return next((value for key, value in attrs if key == name), default)
 
     def _get_a(self, attrs: Attrs) -> Entity:
         url = self._find_attr("href", attrs)
@@ -45,7 +47,12 @@ class Transformer(HTMLParser):
             start = 1
         else:
             start = int(start)
-        return ListGroup(numbered=True, start=start)
+        is_reversed = self._find_attr("reversed", attrs, ...)
+        return ListGroup(
+            numbered=True,
+            start=start,
+            reversed=is_reversed is not ...,
+        )
 
     def _get_li(self, attrs: Attrs) -> Entity:
         return ListItem(list=self.current)

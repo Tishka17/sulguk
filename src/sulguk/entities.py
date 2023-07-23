@@ -174,6 +174,7 @@ class Paragraph(Group):
 class ListGroup(Entity):
     entities: List[Entity] = field(default_factory=list)
     numbered: bool = False
+    reversed: bool = False
     start: int = 1
 
     def add(self, entity: Entity):
@@ -184,7 +185,12 @@ class ListGroup(Entity):
     def render(self, state: State) -> None:
         self._add_soft_new_line(state)
         index = state.index
-        for state.index, entity in enumerate(self.entities, self.start):
+        if self.reversed:
+            indices = range(len(self.entities)-1, -1, -1)
+        else:
+            indices = range(len(self.entities))
+        for item_index, entity in zip(indices, self.entities):
+            state.index = self.start + item_index
             entity.render(state)
             self._add_soft_new_line(state)
         state.index = index
