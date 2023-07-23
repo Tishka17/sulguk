@@ -174,6 +174,7 @@ class Paragraph(Group):
 class ListGroup(Entity):
     entities: List[Entity] = field(default_factory=list)
     numbered: bool = False
+    start: int = 1
 
     def add(self, entity: Entity):
         if isinstance(entity, Text) and not (entity.text.strip()):
@@ -183,7 +184,7 @@ class ListGroup(Entity):
     def render(self, state: State) -> None:
         self._add_soft_new_line(state)
         index = state.index
-        for state.index, entity in enumerate(self.entities, 1):
+        for state.index, entity in enumerate(self.entities, self.start):
             entity.render(state)
             self._add_soft_new_line(state)
         state.index = index

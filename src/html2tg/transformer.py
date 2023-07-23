@@ -40,7 +40,12 @@ class Transformer(HTMLParser):
         return ListGroup(numbered=False)
 
     def _get_ol(self, attrs: Attrs) -> Entity:
-        return ListGroup(numbered=True)
+        start = self._find_attr("start", attrs)
+        if not start:
+            start = 1
+        else:
+            start = int(start)
+        return ListGroup(numbered=True, start=start)
 
     def _get_li(self, attrs: Attrs) -> Entity:
         return ListItem(list=self.current)
