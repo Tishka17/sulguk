@@ -10,4 +10,5 @@ class State:
     indent: int = 0
     text: str = ""
     index: int = 0
+    to_upper: bool = False
     entities: List[MessageEntity] = field(default_factory=list)

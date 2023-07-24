@@ -16,6 +16,8 @@ class Entity(ABC):
             text = text.lstrip()
         if state.text and state.text[-1].isspace():
             text = text.lstrip(" ")
+        if state.to_upper:
+            text = text.upper()
         if with_indent:
             text = " " * (state.indent * 4) + text
         state.text += text
@@ -46,30 +48,39 @@ class Text(Entity):
 
 
 @dataclass
-class WithText(Entity):
-    text: Optional[Text] = None
+class Group(Entity):
+    entities: List[Entity] = field(default_factory=list)
+    block: bool = False
 
-    def add(self, entity: "Entity"):
-        if self.text:
-            raise ValueError("Text is already set")
-        if not isinstance(entity, Text):
-            raise TypeError("Text is expected")
-        self.text = entity
+    def add(self, entity: Entity):
+        self.entities.append(entity)
 
+    def render(self, state: State) -> None:
+        if self.block:
+            self._add_soft_new_line(state)
+            self._add_text(state, "", with_indent=True)
+        for entity in self.entities:
+            entity.render(state)
+        if self.block:
+            self._add_soft_new_line(state)
+
+
+@dataclass
+class DecoratedEntity(Group):
     @abstractmethod
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         raise NotImplementedError
 
     def render(self, state: State) -> None:
         offset = state.offset
-        self.text.render(state)
+        super().render(state)
         state.entities.append(
             self._get_entity(offset, state.offset - offset),
         )
 
 
 @dataclass
-class Link(WithText):
+class Link(DecoratedEntity):
     url: Optional[str] = None
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
@@ -82,7 +93,7 @@ class Link(WithText):
 
 
 @dataclass
-class Bold(WithText):
+class Bold(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="bold",
@@ -92,7 +103,7 @@ class Bold(WithText):
 
 
 @dataclass
-class Italic(WithText):
+class Italic(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="italic",
@@ -102,7 +113,7 @@ class Italic(WithText):
 
 
 @dataclass
-class Underline(WithText):
+class Underline(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="underline",
@@ -112,7 +123,7 @@ class Underline(WithText):
 
 
 @dataclass
-class Strikethrough(WithText):
+class Strikethrough(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="strikethrough",
@@ -122,7 +133,7 @@ class Strikethrough(WithText):
 
 
 @dataclass
-class Spoiler(WithText):
+class Spoiler(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="spoiler",
@@ -132,7 +143,7 @@ class Spoiler(WithText):
 
 
 @dataclass
-class Code(WithText):
+class Code(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="code",
@@ -142,20 +153,12 @@ class Code(WithText):
 
 
 @dataclass
-class Group(Entity):
-    entities: List[Entity] = field(default_factory=list)
-    block: bool = False
-
-    def add(self, entity: Entity):
-        self.entities.append(entity)
-
+class Uppercase(Group):
     def render(self, state: State) -> None:
-        if self.block:
-            self._add_soft_new_line(state)
-        for entity in self.entities:
-            entity.render(state)
-        if self.block:
-            self._add_soft_new_line(state)
+        to_upper = state.to_upper
+        state.to_upper = True
+        super().render(state)
+        state.to_upper = to_upper
 
 
 @dataclass
@@ -169,6 +172,25 @@ class Paragraph(Group):
         super().render(state)
         if not state.text.endswith("\n\n"):
             self._add_text(state, "\n")
+
+
+@dataclass
+class Quote(Group):
+    def render(self, state: State) -> None:
+        self._add_text(state, "“")
+        super().render(state)
+        self._add_text(state, "”")
+
+
+@dataclass
+class Blockquote(Group):
+    block: bool = True
+
+    def render(self, state: State) -> None:
+        indent = state.indent
+        state.indent += 1
+        super().render(state)
+        state.indent = indent
 
 
 @dataclass

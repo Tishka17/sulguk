@@ -5,7 +5,7 @@ from typing import List, Tuple, Optional, Any
 from .entities import (
     Group, Entity, Text, Link, Bold, Italic,
     Strikethrough, Code, ListItem, ListGroup, NewLine, Spoiler,
-    Paragraph,
+    Paragraph, Underline, Uppercase, Quote, Blockquote,
 )
 from .numbers import Format
 
@@ -86,6 +86,25 @@ class Transformer(HTMLParser):
             return Spoiler()
         return Group()
 
+    def _get_h(self, tag: str, attrs: Attrs):
+        inner = Group()
+        entity = Group(block=True)
+        entity.add(Paragraph())
+        if tag == "h1":
+            entity.add(Bold(
+                entities=[Underline(entities=[Uppercase(entities=[inner])])]))
+        elif tag == "h2":
+            entity.add(Bold(entities=[Underline(entities=[inner])]))
+        elif tag == "h3":
+            entity.add(Bold(entities=[inner]))
+        elif tag == "h4":
+            entity.add(Italic(entities=[Underline(entities=[inner])]))
+        elif tag == "h5":
+            entity.add(Italic(entities=[inner]))
+        if tag == "h6":
+            entity.add(Italic(entities=[inner]))
+        return inner, entity
+
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
@@ -96,34 +115,44 @@ class Transformer(HTMLParser):
     def handle_starttag(
             self, tag: str, attrs: Attrs,
     ) -> None:
+        tag = tag.lower()
+
         if tag in ("ul",):
-            entity = self._get_ul(attrs)
+            nested = entity = self._get_ul(attrs)
         elif tag in ("ol",):
-            entity = self._get_ol(attrs)
+            nested = entity = self._get_ol(attrs)
         elif tag in ("li",):
-            entity = self._get_li(attrs)
+            nested = entity = self._get_li(attrs)
         elif tag in ("a",):
-            entity = self._get_a(attrs)
+            nested = entity = self._get_a(attrs)
         elif tag in ("b", "strong"):
-            entity = Bold()
+            nested = entity = Bold()
         elif tag in ("i", "em"):
-            entity = Italic()
+            nested = entity = Italic()
         elif tag in ("s", "strike", "del"):
-            entity = Strikethrough()
+            nested = entity = Strikethrough()
         elif tag in ("code",):
-            entity = Code()
+            nested = entity = Code()
         elif tag in ("div",):
-            entity = Group(block=True)
+            nested = entity = Group(block=True)
         elif tag in ("span",):
-            entity = self._get_span(attrs)
+            nested = entity = self._get_span(attrs)
         elif tag in ("tg-spiler",):
-            entity = Spoiler()
+            nested = entity = Spoiler()
         elif tag in ("p",):
-            entity = Paragraph()
+            nested = entity = Paragraph()
+        elif tag in ("u",):
+            nested = entity = Underline()
+        elif tag in ("q",):
+            nested = entity = Quote()
+        elif tag in ("blockquote",):
+            nested = entity = Blockquote()
+        elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
+            nested, entity = self._get_h(tag, attrs)
         else:
             raise ValueError(f"Unsupported tag: {tag}")
         self.current.add(entity)
-        self.entities.append(entity)
+        self.entities.append(nested)
 
     def handle_endtag(self, tag: str) -> None:
         self.entities.pop()
