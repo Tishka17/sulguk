@@ -7,10 +7,19 @@ from .entities import (
     Strikethrough, Code, ListItem, ListGroup, NewLine, Spoiler,
     Paragraph,
 )
+from .numbers import Format
 
 SPACES = re.compile(r"\s+")
 
 Attrs = List[Tuple[str, Optional[str]]]
+
+OL_FORMAT = {
+    "1": Format.DECIMAL,
+    "a": Format.LETTERS_LOWER,
+    "A": Format.LETTERS_UPPER,
+    "i": Format.ROMAN_LOWER,
+    "I": Format.ROMAN_UPPER,
+}
 
 
 class Transformer(HTMLParser):
@@ -47,15 +56,29 @@ class Transformer(HTMLParser):
             start = 1
         else:
             start = int(start)
+
         is_reversed = self._find_attr("reversed", attrs, ...)
+
+        type_ = self._find_attr("type", attrs)
+        if not type_:
+            ol_format = Format.DECIMAL
+        else:
+            ol_format = OL_FORMAT[type_]
+
         return ListGroup(
             numbered=True,
             start=start,
+            format=ol_format,
             reversed=is_reversed is not ...,
         )
 
     def _get_li(self, attrs: Attrs) -> Entity:
-        return ListItem(list=self.current)
+        value = self._find_attr("value", attrs)
+        if value:
+            value = int(value)
+        else:
+            value = None
+        return ListItem(value=value)
 
     def _get_span(self, attrs: Attrs) -> Entity:
         classes = self._find_attr("class", attrs).split()

@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from aiogram.types import MessageEntity
 
+from .numbers import Format, int_to_number
 from .state import State
 
 
@@ -175,6 +176,7 @@ class ListGroup(Entity):
     entities: List[Entity] = field(default_factory=list)
     numbered: bool = False
     reversed: bool = False
+    format: Format = Format.DECIMAL
     start: int = 1
 
     def add(self, entity: Entity):
@@ -184,29 +186,34 @@ class ListGroup(Entity):
 
     def render(self, state: State) -> None:
         self._add_soft_new_line(state)
-        index = state.index
         if self.reversed:
-            indices = range(len(self.entities)-1, -1, -1)
+            index = len(self.entities) + 1
+            step = -1
         else:
-            indices = range(len(self.entities))
-        for item_index, entity in zip(indices, self.entities):
-            state.index = self.start + item_index
+            index = 0
+            step = 1
+        for entity in self.entities:
+            if isinstance(entity, ListItem):
+                if entity.value is not None:
+                    index = entity.value
+                else:
+                    index += step
+
+                if self.numbered:
+                    index_value = int_to_number(index, self.format)
+                    mark = f"{index_value}. "
+                else:
+                    mark = "* "
+                self._add_text(state, mark, with_indent=True)
             entity.render(state)
             self._add_soft_new_line(state)
-        state.index = index
 
 
 @dataclass
 class ListItem(Group):
-    list: ListGroup = field(default_factory=ListGroup)
+    value: Optional[int] = None
 
     def render(self, state: State) -> None:
-        if self.list.numbered:
-            mark = f"{state.index}. "
-        else:
-            mark = "* "
-        self._add_text(state, mark, with_indent=True)
-
         indent = state.indent
         state.indent += 1
         super().render(state)
