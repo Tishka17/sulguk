@@ -187,7 +187,7 @@ class ListGroup(Entity):
     def render(self, state: State) -> None:
         self._add_soft_new_line(state)
         if self.reversed:
-            index = len(self.entities) + 1
+            index = len(self.entities)
             step = -1
         else:
             index = 0
