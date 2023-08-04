@@ -18,9 +18,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "aiogram"
-]
+dependencies = []
 
 [project.urls]
 "Homepage" = "https://github.com/tishka17/sulguk"

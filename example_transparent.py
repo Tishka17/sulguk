@@ -16,12 +16,13 @@ async def main():
     await bot.send_message(
         chat_id=CHAT_ID,
         text=raw_html,
+        disable_web_page_preview=True,
     )
     await bot.send_message(
         chat_id=CHAT_ID,
         text=raw_html,
-        parse_mode="sulguk"
+        parse_mode="sulguk",
+        disable_web_page_preview=True,
     )
 
-
-asyncio.run(main())
+    asyncio.run(main())

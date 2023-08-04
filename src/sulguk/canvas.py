@@ -21,11 +21,9 @@ NORMAL_SPACES_START = re.compile("^[\x0d\x0a\x09\x20]+")
 
 
 def fix_text_normal(text: str, start_line: bool) -> str:
-    print("fix_text_normal <-", repr(text))
     if start_line:
         text = NORMAL_SPACES_START.sub("", text)
     text = " ".join(NORMAL_SPACES.split(text))
-    print("fix_text_normal ->", repr(text))
     return text
 
 
