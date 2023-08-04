@@ -9,24 +9,6 @@ from .state import State
 
 
 class Entity(ABC):
-    def _add_text(
-            self, state: State, text: str, with_indent: bool = False,
-    ) -> None:
-        if not state.text:
-            text = text.lstrip()
-        if state.text and state.text[-1].isspace():
-            text = text.lstrip(" ")
-        if state.to_upper:
-            text = text.upper()
-        if with_indent:
-            text = " " * (state.indent * 4) + text
-        state.text += text
-        state.offset += len(text.encode("utf-16-le")) // 2
-
-    def _add_soft_new_line(self, state: State):
-        if not state.text.endswith("\n"):
-            self._add_text(state, "\n")
-
     @abstractmethod
     def add(self, entity: "Entity"):
         raise NotImplementedError
@@ -41,7 +23,7 @@ class Text(Entity):
     text: str
 
     def render(self, state: State) -> None:
-        self._add_text(state, self.text)
+        state.canvas.add_text(self.text)
 
     def add(self, entity: "Entity"):
         raise ValueError("Text does not supports children")
@@ -57,12 +39,11 @@ class Group(Entity):
 
     def render(self, state: State) -> None:
         if self.block:
-            self._add_soft_new_line(state)
-            self._add_text(state, "", with_indent=True)
+            state.canvas.add_new_line_soft()
         for entity in self.entities:
             entity.render(state)
         if self.block:
-            self._add_soft_new_line(state)
+            state.canvas.add_new_line_soft()
 
 
 @dataclass
@@ -72,10 +53,10 @@ class DecoratedEntity(Group):
         raise NotImplementedError
 
     def render(self, state: State) -> None:
-        offset = state.offset
+        offset = state.canvas.size
         super().render(state)
         state.entities.append(
-            self._get_entity(offset, state.offset - offset),
+            self._get_entity(offset, state.canvas.size - offset),
         )
 
 
@@ -155,10 +136,10 @@ class Code(DecoratedEntity):
 @dataclass
 class Uppercase(Group):
     def render(self, state: State) -> None:
-        to_upper = state.to_upper
-        state.to_upper = True
+        transform = state.canvas.text_transformation
+        state.canvas.text_transformation = lambda s: s.upper()
         super().render(state)
-        state.to_upper = to_upper
+        state.canvas.text_transformation = transform
 
 
 @dataclass
@@ -166,20 +147,17 @@ class Paragraph(Group):
     block: bool = True
 
     def render(self, state: State) -> None:
-        self._add_soft_new_line(state)
-        if not state.text.endswith("\n\n"):
-            self._add_text(state, "\n")
+        state.canvas.add_empty_line()
         super().render(state)
-        if not state.text.endswith("\n\n"):
-            self._add_text(state, "\n")
+        state.canvas.add_empty_line()
 
 
 @dataclass
 class Quote(Group):
     def render(self, state: State) -> None:
-        self._add_text(state, "“")
+        state.canvas.add_text("“")
         super().render(state)
-        self._add_text(state, "”")
+        state.canvas.add_text("”")
 
 
 @dataclass
@@ -187,10 +165,10 @@ class Blockquote(Group):
     block: bool = True
 
     def render(self, state: State) -> None:
-        indent = state.indent
-        state.indent += 1
+        indent = state.canvas.indent
+        state.canvas.indent += 1
         super().render(state)
-        state.indent = indent
+        state.canvas.indent = indent
 
 
 @dataclass
@@ -207,7 +185,7 @@ class ListGroup(Entity):
         self.entities.append(entity)
 
     def render(self, state: State) -> None:
-        self._add_soft_new_line(state)
+        state.canvas.add_new_line_soft()
         if self.reversed:
             index = len(self.entities)
             step = -1
@@ -225,10 +203,10 @@ class ListGroup(Entity):
                     index_value = int_to_number(index, self.format)
                     mark = f"{index_value}. "
                 else:
-                    mark = "* "
-                self._add_text(state, mark, with_indent=True)
+                    mark = "• "
+                state.canvas.add_text(mark)
             entity.render(state)
-            self._add_soft_new_line(state)
+            state.canvas.add_new_line_soft()
 
 
 @dataclass
@@ -236,15 +214,25 @@ class ListItem(Group):
     value: Optional[int] = None
 
     def render(self, state: State) -> None:
-        indent = state.indent
-        state.indent += 1
+        indent = state.canvas.indent
+        state.canvas.indent += 1
         super().render(state)
-        state.indent = indent
+        state.canvas.indent = indent
 
 
 class NewLine(Entity):
     def add(self, entity: "Entity"):
-        raise ValueError("Usupported contents for NewLine widget")
+        raise ValueError("Unsupported contents for NewLine widget")
 
     def render(self, state: State) -> None:
-        return self._add_text(state, "\n")
+        state.canvas.add_new_line()
+
+
+class HorizontalLine(Entity):
+    def add(self, entity: "Entity"):
+        raise ValueError("Unsupported contents for HorizontalLine widget")
+
+    def render(self, state: State) -> None:
+        state.canvas.add_new_line_soft()
+        state.canvas.add_text("⎯" * 10)
+        state.canvas.add_new_line_soft()

@@ -19,6 +19,6 @@ def transform_html(raw_html: str) -> RenderResult:
     state = State()
     transformer.root.render(state)
     return RenderResult(
-        text=state.text,
+        text=state.canvas.text,
         entities=state.entities,
     )

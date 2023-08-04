@@ -3,12 +3,10 @@ from typing import List
 
 from aiogram.types import MessageEntity
 
+from .canvas import Canvas
+
 
 @dataclass
 class State:
-    offset: int = 0
-    indent: int = 0
-    text: str = ""
-    index: int = 0
-    to_upper: bool = False
+    canvas: Canvas = field(default_factory=Canvas)
     entities: List[MessageEntity] = field(default_factory=list)
