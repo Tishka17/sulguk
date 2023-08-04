@@ -37,3 +37,26 @@ await bot.send_message(
 ### Usage without middleware
 
 Instead of usage of custom parse mode you can import `transform_html` and transform HTML to entities manually.
+
+
+### Problem:
+
+Let's iamgine we have HTML like this:
+```html
+<b>This is a demo of <a href="https://github.com/tishka17/sulguk">Sulguk</a></b>
+
+    <u>Underlined</u>
+    <i>Italic</i>
+    <b>Bold</b>
+```
+
+This is how it is rendered in browser:
+![](images/problem_browser.png)
+
+But this is how it is rendered in Telegram with `parse_mode="html"`:
+![](images/problem_telegram.png)
+
+You can notice, that all spaces are processed incorrectly. Adding the very small list of supported HTML tags we need a better solution.
+
+So this is how this HTML is rendered in Telegram with `sulguk`:
+![](images/problem_sulguk.png)
