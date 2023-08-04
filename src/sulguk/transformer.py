@@ -105,10 +105,10 @@ class Transformer(HTMLParser):
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
-        if tag == "hr":
+        elif tag == "hr":
             entity = HorizontalLine()
         else:
-            raise ValueError(f"Unsupported single tag: {tag}")
+            raise ValueError(f"Unsupported single tag: `{tag}`")
         self.current.add(entity)
 
     def handle_starttag(
