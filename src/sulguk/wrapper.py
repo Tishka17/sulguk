@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from aiogram.types import MessageEntity
-
-from .state import State
+from .state import MessageEntity, State
 from .transformer import Transformer
 
 

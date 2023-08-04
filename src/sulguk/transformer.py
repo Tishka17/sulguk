@@ -1,10 +1,11 @@
 from html.parser import HTMLParser
-from typing import List, Tuple, Optional, Any
+from typing import Any, List, Optional, Tuple
 
 from .entities import (
-    Group, Entity, Text, Link, Bold, Italic,
-    Strikethrough, Code, ListItem, ListGroup, NewLine, Spoiler,
-    Paragraph, Underline, Uppercase, Quote, Blockquote, HorizontalLine,
+    Blockquote, Bold, Code, Entity, Group, HorizontalLine,
+    Italic, Link, ListGroup, ListItem, NewLine, Paragraph,
+    Quote, Spoiler, Strikethrough, Text, Underline,
+    Uppercase,
 )
 from .numbers import Format
 

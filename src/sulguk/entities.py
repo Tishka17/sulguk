@@ -2,10 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from aiogram.types import MessageEntity
-
 from .numbers import Format, int_to_number
-from .state import State
+from .state import MessageEntity, State
 
 
 class Entity(ABC):

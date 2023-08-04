@@ -5,13 +5,14 @@ from aiogram.client.session.middlewares.base import (
     BaseRequestMiddleware,
     NextRequestMiddlewareType,
 )
-from aiogram.methods import TelegramMethod, Response
+from aiogram.methods import Response, TelegramMethod
 from aiogram.methods.base import TelegramType
 
 from .wrapper import transform_html
 
 logger = logging.getLogger(__name__)
 
+SULGUK_PARSE_MODE = "sulguk"
 
 class SulgukMiddleware(BaseRequestMiddleware):
     async def __call__(
@@ -20,7 +21,7 @@ class SulgukMiddleware(BaseRequestMiddleware):
             bot: "Bot",
             method: TelegramMethod[TelegramType],
     ) -> Response[TelegramType]:
-        if getattr(method, "parse_mode", "") == "sulguk":
+        if getattr(method, "parse_mode", "") == SULGUK_PARSE_MODE:
             if hasattr(method, "caption"):
                 result = transform_html(method.caption)
                 method.caption = result.text

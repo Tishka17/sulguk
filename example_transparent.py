@@ -2,7 +2,8 @@ import asyncio
 import os
 
 from aiogram import Bot
-from sulguk.aiogram_middleware import SulgukMiddleware
+
+from sulguk.aiogram_middleware import SulgukMiddleware, SULGUK_PARSE_MODE
 
 CHAT_ID = 1
 
@@ -21,8 +22,9 @@ async def main():
     await bot.send_message(
         chat_id=CHAT_ID,
         text=raw_html,
-        parse_mode="sulguk",
+        parse_mode=SULGUK_PARSE_MODE,
         disable_web_page_preview=True,
     )
 
-    asyncio.run(main())
+
+asyncio.run(main())

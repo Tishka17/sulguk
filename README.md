@@ -11,7 +11,7 @@ Try `sulguk` (술국, a hangover soup) - [delviered since 1800s](https://en.wiki
 
 1. Add `SulgukMiddleware` to your bot
 ```python
-from sulguk.aiogram_middleware import SulgukMiddleware
+from sulguk.aiogram_middleware import SulgukMiddleware, SULGUK_PARSE_MODE
 bot.session.middleware(SulgukMiddleware())
 ```
 
@@ -29,7 +29,7 @@ bot.session.middleware(SulgukMiddleware())
 await bot.send_message(
     chat_id=CHAT_ID,
     text=raw_html,
-    parse_mode="sulguk"
+    parse_mode=SULGUK_PARSE_MODE,
 )
 ```
 
