@@ -5,7 +5,7 @@ Need to deliver formatted content to your bot clients?
 Having a hangover after trying to fit HTML into telegram? 
 Beautifulsoup is too complicated and not helping with messages?
 
-Try `sulguk` (술국, a hangover soup) - [delviered since 1800s](https://en.wikipedia.org/wiki/Food_delivery).
+Try `sulguk` (술국, a hangover soup) - [delivered since 1800s](https://en.wikipedia.org/wiki/Food_delivery).
 
 ### Example
 
