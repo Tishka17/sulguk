@@ -136,10 +136,10 @@ class Code(DecoratedEntity):
 @dataclass
 class Uppercase(Group):
     def render(self, state: State) -> None:
-        to_upper = state.to_upper
-        state.to_upper = True
+        transform = state.canvas.text_transformation
+        state.canvas.text_transformation = lambda s: s.upper()
         super().render(state)
-        state.to_upper = to_upper
+        state.canvas.text_transformation = transform
 
 
 @dataclass
@@ -165,10 +165,10 @@ class Blockquote(Group):
     block: bool = True
 
     def render(self, state: State) -> None:
-        indent = state.indent
-        state.indent += 1
+        indent = state.canvas.indent
+        state.canvas.indent += 1
         super().render(state)
-        state.indent = indent
+        state.canvas.indent = indent
 
 
 @dataclass
@@ -203,7 +203,7 @@ class ListGroup(Entity):
                     index_value = int_to_number(index, self.format)
                     mark = f"{index_value}. "
                 else:
-                    mark = "* "
+                    mark = "• "
                 state.canvas.add_text(mark)
             entity.render(state)
             state.canvas.add_new_line_soft()
@@ -214,10 +214,10 @@ class ListItem(Group):
     value: Optional[int] = None
 
     def render(self, state: State) -> None:
-        indent = state.indent
-        state.indent += 1
+        indent = state.canvas.indent
+        state.canvas.indent += 1
         super().render(state)
-        state.indent = indent
+        state.canvas.indent = indent
 
 
 class NewLine(Entity):
@@ -234,5 +234,5 @@ class HorizontalLine(Entity):
 
     def render(self, state: State) -> None:
         state.canvas.add_new_line_soft()
-        state.canvas.add_text("⎯"*10)
+        state.canvas.add_text("⎯" * 10)
         state.canvas.add_new_line_soft()

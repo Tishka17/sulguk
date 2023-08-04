@@ -33,8 +33,10 @@ class Canvas:
     def __init__(self):
         self.text = ""
         self.size = 0
+        self.indent = 0
         self.state = State.NEW_LINE
         self.text_mode = TextMode.NORMAL
+        self.text_transformation = None
 
     def _trim_last_space(self):
         if not self.state == State.SPACE:
@@ -45,6 +47,13 @@ class Canvas:
     def _add_text_raw(self, text: str):
         self.text += text
         self.size += len(text.encode("utf-16-le")) // 2
+
+    def _add_indent(self):
+        if self.state not in (State.START, State.NEW_LINE, State.EMPTY_LINE):
+            return
+        if not self.indent:
+            return
+        self._add_text_raw("\xa0" * self.indent)
 
     def add_space(self):
         if not self.text:
@@ -80,12 +89,16 @@ class Canvas:
         self.state = State.EMPTY_LINE
 
     def add_text(self, text):
+        if self.text_transformation:
+            text = self.text_transformation(text)
         text = fix_text_normal(
             text=text,
-            start_line=self.state in (State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE)
+            start_line=self.state in (
+                State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE)
         )
         if not text:
             return
+        self._add_indent()
         self._add_text_raw(text)
         if text.endswith(" "):
             self.state = State.SPACE
