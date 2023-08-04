@@ -8,18 +8,19 @@ from aiogram.client.session.middlewares.base import (
 from aiogram.methods import Response, TelegramMethod
 from aiogram.methods.base import TelegramType
 
+from sulguk.data import SULGUK_PARSE_MODE
+
 from .wrapper import transform_html
 
 logger = logging.getLogger(__name__)
 
-SULGUK_PARSE_MODE = "sulguk"
 
 class SulgukMiddleware(BaseRequestMiddleware):
     async def __call__(
-            self,
-            make_request: NextRequestMiddlewareType[TelegramType],
-            bot: "Bot",
-            method: TelegramMethod[TelegramType],
+        self,
+        make_request: NextRequestMiddlewareType[TelegramType],
+        bot: "Bot",
+        method: TelegramMethod[TelegramType],
     ) -> Response[TelegramType]:
         if getattr(method, "parse_mode", "") == SULGUK_PARSE_MODE:
             if hasattr(method, "caption"):

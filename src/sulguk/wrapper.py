@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
-from .state import MessageEntity, State
+from sulguk.render.state import MessageEntity, State
+
 from .transformer import Transformer
 
 

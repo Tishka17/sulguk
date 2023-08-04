@@ -1,14 +1,6 @@
-from enum import Enum
 from string import ascii_uppercase
 
-
-class Format(Enum):
-    DECIMAL = "DECIMAL"
-    ROMAN_LOWER = "ROMAN_LOWER"
-    ROMAN_UPPER = "ROMAN_UPPER"
-    LETTERS_LOWER = "LETTERS_LOWER"
-    LETTERS_UPPER = "LETTERS_UPPER"
-
+from sulguk.data import NumberFormat
 
 roman = {
     1000: "M",
@@ -31,7 +23,7 @@ def _roman_num(num):
     for r in roman.keys():
         x, y = divmod(num, r)
         yield roman[r] * x
-        num -= (r * x)
+        num -= r * x
         if num <= 0:
             break
 
@@ -48,14 +40,14 @@ def to_letters(value: int) -> str:
     return result[::-1]
 
 
-def int_to_number(value: int, format: Format) -> str:
-    if format is Format.DECIMAL:
+def int_to_number(value: int, format: NumberFormat) -> str:
+    if format is NumberFormat.DECIMAL:
         return str(value)
-    elif format is Format.LETTERS_UPPER:
+    elif format is NumberFormat.LETTERS_UPPER:
         return to_letters(value)
-    elif format is Format.LETTERS_LOWER:
+    elif format is NumberFormat.LETTERS_LOWER:
         return to_letters(value).lower()
-    elif format is Format.ROMAN_UPPER:
+    elif format is NumberFormat.ROMAN_UPPER:
         return to_roman(value)
-    elif format is Format.ROMAN_LOWER:
+    elif format is NumberFormat.ROMAN_LOWER:
         return to_roman(value).lower()

@@ -1,22 +1,23 @@
 from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
+from sulguk.render.numbers import NumberFormat
+
 from .entities import (
     Blockquote, Bold, Code, Entity, Group, HorizontalLine,
     Italic, Link, ListGroup, ListItem, NewLine, Paragraph,
     Quote, Spoiler, Strikethrough, Text, Underline,
     Uppercase,
 )
-from .numbers import Format
 
 Attrs = List[Tuple[str, Optional[str]]]
 
 OL_FORMAT = {
-    "1": Format.DECIMAL,
-    "a": Format.LETTERS_LOWER,
-    "A": Format.LETTERS_UPPER,
-    "i": Format.ROMAN_LOWER,
-    "I": Format.ROMAN_UPPER,
+    "1": NumberFormat.DECIMAL,
+    "a": NumberFormat.LETTERS_LOWER,
+    "A": NumberFormat.LETTERS_UPPER,
+    "i": NumberFormat.ROMAN_LOWER,
+    "I": NumberFormat.ROMAN_UPPER,
 }
 
 
@@ -34,7 +35,10 @@ class Transformer(HTMLParser):
         self.current.add(Text(data))
 
     def _find_attr(
-            self, name: str, attrs: Attrs, default: Any = "",
+        self,
+        name: str,
+        attrs: Attrs,
+        default: Any = "",
     ) -> Optional[str]:
         return next((value for key, value in attrs if key == name), default)
 
@@ -59,7 +63,7 @@ class Transformer(HTMLParser):
 
         type_ = self._find_attr("type", attrs)
         if not type_:
-            ol_format = Format.DECIMAL
+            ol_format = NumberFormat.DECIMAL
         else:
             ol_format = OL_FORMAT[type_]
 
@@ -89,8 +93,13 @@ class Transformer(HTMLParser):
         entity = Group(block=True)
         entity.add(Paragraph())
         if tag == "h1":
-            entity.add(Bold(
-                entities=[Underline(entities=[Uppercase(entities=[inner])])]))
+            entity.add(
+                Bold(
+                    entities=[
+                        Underline(entities=[Uppercase(entities=[inner])])
+                    ]
+                )
+            )
         elif tag == "h2":
             entity.add(Bold(entities=[Underline(entities=[inner])]))
         elif tag == "h3":
@@ -113,7 +122,9 @@ class Transformer(HTMLParser):
         self.current.add(entity)
 
     def handle_starttag(
-            self, tag: str, attrs: Attrs,
+        self,
+        tag: str,
+        attrs: Attrs,
     ) -> None:
         tag = tag.lower()
 
@@ -137,7 +148,7 @@ class Transformer(HTMLParser):
             nested = entity = Group(block=True)
         elif tag in ("span",):
             nested = entity = self._get_span(attrs)
-        elif tag in ("tg-spiler",):
+        elif tag in ("tg-spoiler",):
             nested = entity = Spoiler()
         elif tag in ("p",):
             nested = entity = Paragraph()

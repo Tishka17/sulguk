@@ -1,0 +1,96 @@
+from dataclasses import dataclass
+from typing import Optional
+
+from sulguk.data import MessageEntity
+from sulguk.render import State
+
+from .base import DecoratedEntity, Group
+
+
+@dataclass
+class Link(DecoratedEntity):
+    url: Optional[str] = None
+
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(
+            type="text_link",
+            url=self.url,
+            offset=offset,
+            length=length,
+        )
+
+
+@dataclass
+class Bold(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(type="bold", offset=offset, length=length)
+
+
+@dataclass
+class Italic(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(type="italic", offset=offset, length=length)
+
+
+@dataclass
+class Underline(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(type="underline", offset=offset, length=length)
+
+
+@dataclass
+class Strikethrough(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(
+            type="strikethrough", offset=offset, length=length
+        )
+
+
+@dataclass
+class Spoiler(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(type="spoiler", offset=offset, length=length)
+
+
+@dataclass
+class Code(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(type="code", offset=offset, length=length)
+
+
+@dataclass
+class Uppercase(Group):
+    def render(self, state: State) -> None:
+        transform = state.canvas.text_transformation
+        state.canvas.text_transformation = lambda s: s.upper()
+        super().render(state)
+        state.canvas.text_transformation = transform
+
+
+@dataclass
+class Quote(Group):
+    def render(self, state: State) -> None:
+        state.canvas.add_text("“")
+        super().render(state)
+        state.canvas.add_text("”")
+
+
+@dataclass
+class Blockquote(Group):
+    block: bool = True
+
+    def render(self, state: State) -> None:
+        indent = state.canvas.indent
+        state.canvas.indent += 1
+        super().render(state)
+        state.canvas.indent = indent
+
+
+@dataclass
+class Paragraph(Group):
+    block: bool = True
+
+    def render(self, state: State) -> None:
+        state.canvas.add_empty_line()
+        super().render(state)
+        state.canvas.add_empty_line()

@@ -64,3 +64,29 @@ You can notice, that all spaces are processed incorrectly. Adding the very small
 So this is how this HTML is rendered in Telegram with `sulguk`:
 
 ![](images/problem_sulguk.png)
+
+
+### Supported tags:
+
+* `<br/>`
+* `<hr/>`
+* `<ul>`
+* `<ol>` - with optional attributes
+  * `reversed` - to reverse numbers order
+  * `type` (`1`/`a`/`A`/`i`/`I`) - to set numbering style
+  * `start` - to set starting number
+* `<li>` - with optional  `value` attribute to change number. Nested lists have indentation
+* `<a>`
+* `<b>`, `<strong>`
+* `<i>`, `<em>`
+* `<s>`, `<strike>`, `<del>`
+* `<div>` - to make a block (not inline) element
+* `<span>` - to make an inline element, attribute class `tg-spoiler` is optional
+* `<tg-spoiler>`
+* `<p>` - to make a paragraph, emphasized with empty lines
+* `<u>`
+* `<q>` - to add quote signs around the text
+* `<blockquote>` - like a paragram, but with indentation
+* `<h1>`-`<h6>` - processed, but styled using available telegram options
+
+Unsupported tags are raising an error.

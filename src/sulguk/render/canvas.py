@@ -91,8 +91,8 @@ class Canvas:
             text = self.text_transformation(text)
         text = fix_text_normal(
             text=text,
-            start_line=self.state in (
-                State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE)
+            start_line=self.state
+            in (State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE),
         )
         if not text:
             return
