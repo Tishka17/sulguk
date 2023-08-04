@@ -233,4 +233,6 @@ class HorizontalLine(Entity):
         raise ValueError("Unsupported contents for HorizontalLine widget")
 
     def render(self, state: State) -> None:
-        state.canvas.add_text("-------------")
+        state.canvas.add_new_line_soft()
+        state.canvas.add_text("⎯"*10)
+        state.canvas.add_new_line_soft()

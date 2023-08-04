@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional, Any
 from .entities import (
     Group, Entity, Text, Link, Bold, Italic,
     Strikethrough, Code, ListItem, ListGroup, NewLine, Spoiler,
-    Paragraph, Underline, Uppercase, Quote, Blockquote,
+    Paragraph, Underline, Uppercase, Quote, Blockquote, HorizontalLine,
 )
 from .numbers import Format
 
@@ -105,6 +105,8 @@ class Transformer(HTMLParser):
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
+        if tag == "hr":
+            entity = HorizontalLine()
         else:
             raise ValueError(f"Unsupported single tag: {tag}")
         self.current.add(entity)
