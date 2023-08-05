@@ -67,7 +67,6 @@ await bot.send_message(
     chat_id=CHAT_ID,
     text=result.text,
     entities=result.entities,
-    parse_mode="html",
 )
 ```
 
