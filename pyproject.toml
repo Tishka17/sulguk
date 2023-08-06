@@ -12,7 +12,7 @@ authors = [
     { name = "Andrey Tikhonov", email = "17@itishka.org" },
 ]
 readme = "README.md"
-description = "Comverter HTML to Telegram Entities"
+description = "Converter HTML to Telegram Entities"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
 classifiers = [

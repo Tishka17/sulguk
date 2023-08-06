@@ -106,27 +106,32 @@ await bot.send_message(
 
 ## Supported tags:
 
-* `<br/>`
-* `<hr/>`
-* `<ul>`
-* `<ol>` - with optional attributes
+For all supported tags unknown attributes are ignored as well as unknown classes.
+Unsupported tags are raising an error. 
+
+Standard telegram tags (with some changes):
+* `<a>` - a hyperlink with `href` attribute 
+* `<b>`, `<strong>` - a bold text
+* `<i>`, `<em>` - an italic text
+* `<s>`, `<strike>`, `<del>` - a strikethrough text
+* `<u>`, `<ins>` - an underlined text
+* `<span>` - an inline element with optional attribute `class="tg-spoiler"` to make a spoiler
+* `<tg-spoiler>` - a telegram spoiler
+* `<pre>` with optional `class="language-<name>"` - a preformatted block with code. `<name>` will be sent as a language attribute in telegram.
+* `<code>` - an inline preformatted element. 
+
+Additional tags:
+* `<br/>` - new line
+* `<hr/>` - horizontal line
+* `<ul>` - unordered list
+* `<ol>` - ordered list with optional attributes
     * `reversed` - to reverse numbers order
     * `type` (`1`/`a`/`A`/`i`/`I`) - to set numbering style
     * `start` - to set starting number
-* `<li>` - with optional  `value` attribute to change number. Nested lists have
+* `<li>` - list item, with optional  `value` attribute to change number. Nested lists have
   indentation
-* `<a>`
-* `<b>`, `<strong>`
-* `<i>`, `<em>`
-* `<s>`, `<strike>`, `<del>`
-* `<div>` - to make a block (not inline) element
-* `<span>` - to make an inline element, attribute class `tg-spoiler` is
-  optional
-* `<tg-spoiler>`
-* `<p>` - to make a paragraph, emphasized with empty lines
-* `<u>`
-* `<q>` - to add quote signs around the text
-* `<blockquote>` - like a paragram, but with indentation
-* `<h1>`-`<h6>` - processed, but styled using available telegram options
-
-Unsupported tags are raising an error.
+* `<div>` - a block (not inline) element
+* `<p>` - a paragraph, emphasized with empty lines
+* `<q>` - a quoted text
+* `<blockquote>` - a block quote. Like a paragraph with indentation
+* `<h1>`-`<h6>` - text headers, styled using available telegram options

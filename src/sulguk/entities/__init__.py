@@ -13,6 +13,7 @@ __all__ = [
     "Quote",
     "Blockquote",
     "Paragraph",
+    "Pre",
     "ListGroup",
     "ListItem",
     "NewLine",
@@ -21,8 +22,10 @@ __all__ = [
 ]
 
 from .base import DecoratedEntity, Entity, Group
-from .decoration import (Blockquote, Bold, Code, Italic, Link, Paragraph,
-                         Quote, Spoiler, Strikethrough, Underline, Uppercase)
+from .decoration import (
+    Blockquote, Bold, Code, Italic, Link, Paragraph, Pre,
+    Quote, Spoiler, Strikethrough, Underline, Uppercase,
+)
 from .list import ListGroup, ListItem
 from .no_contents import HorizontalLine, NewLine
 from .text import Text
