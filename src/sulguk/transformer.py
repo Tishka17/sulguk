@@ -2,10 +2,9 @@ from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
 from sulguk.render.numbers import NumberFormat
-
 from .entities import (
     Blockquote, Bold, Code, Entity, Group, HorizontalLine,
-    Italic, Link, ListGroup, ListItem, NewLine, Paragraph,
+    Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre,
     Quote, Spoiler, Strikethrough, Text, Underline,
     Uppercase,
 )
@@ -19,6 +18,8 @@ OL_FORMAT = {
     "i": NumberFormat.ROMAN_LOWER,
     "I": NumberFormat.ROMAN_UPPER,
 }
+
+LANG_CLASS_PREFIX = "language-"
 
 
 class Transformer(HTMLParser):
@@ -35,12 +36,15 @@ class Transformer(HTMLParser):
         self.current.add(Text(data))
 
     def _find_attr(
-        self,
-        name: str,
-        attrs: Attrs,
-        default: Any = "",
+            self,
+            name: str,
+            attrs: Attrs,
+            default: Any = "",
     ) -> Optional[str]:
         return next((value for key, value in attrs if key == name), default)
+
+    def _get_classes(self, attrs: Attrs):
+        return self._find_attr("class", attrs).split()
 
     def _get_a(self, attrs: Attrs) -> Entity:
         url = self._find_attr("href", attrs)
@@ -83,10 +87,25 @@ class Transformer(HTMLParser):
         return ListItem(value=value)
 
     def _get_span(self, attrs: Attrs) -> Entity:
-        classes = self._find_attr("class", attrs).split()
+        classes = self._get_classes(attrs)
         if "tg-spoiler" in classes:
             return Spoiler()
         return Group()
+
+    def _get_code(self, attrs: Attrs) -> Entity:
+        return Code()
+
+    def _get_pre(self, attrs: Attrs) -> Entity:
+        classes = self._get_classes(attrs)
+        language = next(
+            (
+                c[len(LANG_CLASS_PREFIX):]
+                for c in classes
+                if c.startswith(LANG_CLASS_PREFIX)
+            ),
+            None,
+        )
+        return Pre(language=language)
 
     def _get_h(self, tag: str, attrs: Attrs):
         inner = Group()
@@ -122,9 +141,9 @@ class Transformer(HTMLParser):
         self.current.add(entity)
 
     def handle_starttag(
-        self,
-        tag: str,
-        attrs: Attrs,
+            self,
+            tag: str,
+            attrs: Attrs,
     ) -> None:
         tag = tag.lower()
 
@@ -143,7 +162,7 @@ class Transformer(HTMLParser):
         elif tag in ("s", "strike", "del"):
             nested = entity = Strikethrough()
         elif tag in ("code",):
-            nested = entity = Code()
+            nested = entity = self._get_code(attrs)
         elif tag in ("div",):
             nested = entity = Group(block=True)
         elif tag in ("span",):
@@ -152,10 +171,12 @@ class Transformer(HTMLParser):
             nested = entity = Spoiler()
         elif tag in ("p",):
             nested = entity = Paragraph()
-        elif tag in ("u",):
+        elif tag in ("u", "ins"):
             nested = entity = Underline()
         elif tag in ("q",):
             nested = entity = Quote()
+        elif tag in ("pre",):
+            nested = entity = self._get_pre(attrs)
         elif tag in ("blockquote",):
             nested = entity = Blockquote()
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):

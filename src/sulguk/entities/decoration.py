@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from sulguk.data import MessageEntity
-from sulguk.render import State
-
+from sulguk.render import State, TextMode
 from .base import DecoratedEntity, Group
 
 
@@ -54,8 +53,11 @@ class Spoiler(DecoratedEntity):
 
 @dataclass
 class Code(DecoratedEntity):
+
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
-        return MessageEntity(type="code", offset=offset, length=length)
+        return MessageEntity(
+            type="code", offset=offset, length=length,
+        )
 
 
 @dataclass
@@ -94,3 +96,22 @@ class Paragraph(Group):
         state.canvas.add_empty_line()
         super().render(state)
         state.canvas.add_empty_line()
+
+
+@dataclass
+class Pre(DecoratedEntity):
+    block: bool = True
+    language: Optional[str] = None
+
+    def render(self, state: State) -> None:
+        text_mode = state.canvas.text_mode
+        state.canvas.add_empty_line()
+        state.canvas.text_mode = TextMode.PRE
+        super().render(state)
+        state.canvas.text_mode = text_mode
+        state.canvas.add_empty_line()
+
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(
+            type="pre", offset=offset, length=length, language=self.language,
+        )
