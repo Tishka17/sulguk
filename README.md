@@ -28,15 +28,15 @@ Let's imagine we have HTML like this:
 
 This is how it is rendered in browser (expected behavior):
 
-![](images/problem_browser.png)
+![](https://github.com/tishka17/sulguk/blob/master/images/problem_browser.png?raw=True)
 
 But this is how it is rendered in Telegram with `parse_mode="html"`:
 
-![](images/problem_telegram.png)
+![](https://github.com/tishka17/sulguk/blob/master/images/problem_telegram.png?raw=True)
 
 T osolve this we can convert HTML to telegram entites with `sulguk`. So that's how it looks now:
 
-![](images/problem_sulguk.png)
+![](https://github.com/tishka17/sulguk/blob/master/images/problem_sulguk.png?raw=True)
 
 ## Example
 
