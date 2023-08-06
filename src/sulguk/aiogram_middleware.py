@@ -19,7 +19,7 @@ from .wrapper import transform_html
 logger = logging.getLogger(__name__)
 
 
-class SulgukMiddleware(BaseRequestMiddleware):
+class AiogramSulgukMiddleware(BaseRequestMiddleware):
     async def __call__(
             self,
             make_request: NextRequestMiddlewareType[TelegramType],

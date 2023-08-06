@@ -76,9 +76,9 @@ await bot.send_message(
 1. Add `SulgukMiddleware` to your bot
 
 ```python
-from sulguk.aiogram_middleware import SulgukMiddleware
+from sulguk import AiogramSulgukMiddleware
 
-bot.session.middleware(SulgukMiddleware())
+bot.session.middleware(AiogramSulgukMiddleware())
 ```
 
 2. Create your nice HTML:
@@ -95,7 +95,7 @@ bot.session.middleware(SulgukMiddleware())
 3. Send it using `sulguk` as a `parse_mode`:
 
 ```python
-from sulguk.data import SULGUK_PARSE_MODE
+from sulguk import SULGUK_PARSE_MODE
 
 await bot.send_message(
     chat_id=CHAT_ID,
