@@ -11,7 +11,9 @@ from aiogram.methods import (
     EditMessageMedia, SendMediaGroup,
 )
 from aiogram.methods.base import TelegramType
-from aiogram.types import InlineQueryResultArticle
+from aiogram.types import (
+    InlineQueryResultArticle, UNSET_PARSE_MODE
+)
 
 from sulguk.data import SULGUK_PARSE_MODE
 from .wrapper import transform_html
@@ -62,7 +64,8 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         self._transform_text_caption(object)
 
     def _transform_text_caption(self, object: Any):
-        if getattr(object, "parse_mode", "") == SULGUK_PARSE_MODE:
+        parse_mode = getattr(object, "parse_mode", "")
+        if parse_mode == SULGUK_PARSE_MODE or parse_mode == UNSET_PARSE_MODE:
             if hasattr(object, "caption"):
                 result = transform_html(object.caption)
                 object.caption = result.text
