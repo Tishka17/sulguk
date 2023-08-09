@@ -31,9 +31,9 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         elif type(method) is SendMediaGroup:
             self._process_send_media_group(method)
         elif type(method) is AnswerWebAppQuery:
-            self._process_answer_inline_query(method)
-        elif type(method) is AnswerInlineQuery:
             self._process_answer_web_app_query(method)
+        elif type(method) is AnswerInlineQuery:
+            self._process_answer_inline_query(method)
         else:
             self._process_generic(method)
         return await make_request(bot, method)
