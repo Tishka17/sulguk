@@ -1,6 +1,12 @@
 Sulguk - HTML to telegram entities converter
 ================================================
 
+
+[![PyPI version](https://badge.fury.io/py/sulguk.svg)](https://badge.fury.io/py/aiogram-sulguk)
+[![downloads](https://img.shields.io/pypi/dm/sulguk.svg)](https://pypistats.org/packages/sulguk)
+[![license](https://img.shields.io/github/license/Tishka17/sulguk.svg)](https://github.com/Tishka17/sulguk/blob/master/LICENSE)
+
+
 Need to deliver formatted content to your bot clients?
 Having a hangover after trying to fit HTML into telegram?
 Beautifulsoup is too complicated and not helping with messages?
