@@ -28,7 +28,6 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             bot: "Bot",
             method: TelegramMethod[TelegramType],
     ) -> Response[TelegramType]:
-
         handlers = {
             EditMessageMedia: self._process_edit_message_media,
             SendMediaGroup: self._process_send_media_group,
