@@ -11,7 +11,9 @@ from aiogram.methods import (
     EditMessageMedia, SendMediaGroup,
 )
 from aiogram.methods.base import TelegramType
-from aiogram.types import InlineQueryResultArticle
+from aiogram.types import (
+    InlineQueryResultArticle, UNSET_PARSE_MODE
+)
 
 from sulguk.data import SULGUK_PARSE_MODE
 from .wrapper import transform_html
@@ -26,51 +28,63 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             bot: "Bot",
             method: TelegramMethod[TelegramType],
     ) -> Response[TelegramType]:
-        if type(method) is EditMessageMedia:
-            self._process_edit_message_media(method)
-        elif type(method) is SendMediaGroup:
-            self._process_send_media_group(method)
-        elif type(method) is AnswerWebAppQuery:
-            self._process_answer_web_app_query(method)
-        elif type(method) is AnswerInlineQuery:
-            self._process_answer_inline_query(method)
-        else:
-            self._process_generic(method)
+        handlers = {
+            EditMessageMedia: self._process_edit_message_media,
+            SendMediaGroup: self._process_send_media_group,
+            AnswerWebAppQuery: self._process_answer_web_app_query,
+            AnswerInlineQuery: self._process_answer_inline_query
+        }
+
+        handler = handlers.get(type(method), self._process_generic)
+        handler(method, bot)
+
         return await make_request(bot, method)
 
-    def _process_answer_inline_query(self, object: AnswerInlineQuery):
+    def _process_inline_query_result(self, result, bot: "Bot"):
+        target = result.input_message_content if isinstance(result, InlineQueryResultArticle) else result
+        self._transform_text_caption(target, bot)
+
+    def _process_answer_inline_query(self, object: AnswerInlineQuery, bot: "Bot"):
         for result in object.results:
-            if type(result) is InlineQueryResultArticle:
-                self._transform_text_caption(result.input_message_content)
-            else:
-                self._transform_text_caption(result)
+            self._process_inline_query_result(result, bot)
 
-    def _process_answer_web_app_query(self, object: AnswerWebAppQuery):
-        if type(object.result) is InlineQueryResultArticle:
-            self._transform_text_caption(object.result.input_message_content)
-        else:
-            self._transform_text_caption(object.result)
+    def _process_answer_web_app_query(self, object: AnswerWebAppQuery, bot: "Bot"):
+        self._process_inline_query_result(object.result, bot)
 
-    def _process_edit_message_media(self, object: EditMessageMedia):
-        self._transform_text_caption(object.media)
+    def _process_edit_message_media(self, object: EditMessageMedia, bot: "Bot"):
+        self._transform_text_caption(object.media, bot)
 
-    def _process_send_media_group(self, object: SendMediaGroup):
+    def _process_send_media_group(self, object: SendMediaGroup, bot: "Bot"):
         for media in object.media:
-            self._transform_text_caption(media)
+            self._transform_text_caption(media, bot)
 
-    def _process_generic(self, object: Any):
-        self._transform_text_caption(object)
+    def _process_generic(self, object: Any, bot: "Bot"):
+        self._transform_text_caption(object, bot)
 
-    def _transform_text_caption(self, object: Any):
-        if getattr(object, "parse_mode", "") == SULGUK_PARSE_MODE:
-            if hasattr(object, "caption"):
-                result = transform_html(object.caption)
-                object.caption = result.text
-                object.caption_entities = result.entities
-            elif hasattr(object, "text"):
-                result = transform_html(object.text)
-                object.text = result.text
-                object.entities = result.entities
-            else:
-                raise ValueError()
-            del object.parse_mode
+    def _transform_text_caption(self, object: Any, bot: "Bot"):
+
+        if self._check_pars_mode(object, bot):
+            return
+
+        content_attribute = None
+        if hasattr(object, "caption"):
+            content_attribute = 'caption'
+        elif hasattr(object, "text"):
+            content_attribute = 'text'
+
+        if not content_attribute:
+            raise ValueError("The object does not have a 'caption' or 'text' attribute.")
+
+        original_content = getattr(object, content_attribute)
+        transformed_content = transform_html(original_content)
+
+        setattr(object, content_attribute, transformed_content.text)
+        setattr(object, "entities", transformed_content.entities)
+
+        object.parse_mode = None
+
+    def _check_pars_mode(self, object: Any, bot: "Bot"):
+        parse_mode = getattr(object, "parse_mode", "")
+        is_obj_sulguk = parse_mode == SULGUK_PARSE_MODE
+        is_bot_unset = bot.parse_mode == SULGUK_PARSE_MODE and parse_mode == UNSET_PARSE_MODE
+        return not (is_obj_sulguk or is_bot_unset)
