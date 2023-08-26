@@ -18,6 +18,7 @@ __all__ = [
     "ListItem",
     "NewLine",
     "HorizontalLine",
+    "Progress",
     "Text",
 ]
 
@@ -28,4 +29,5 @@ from .decoration import (
 )
 from .list import ListGroup, ListItem
 from .no_contents import HorizontalLine, NewLine
+from .progress import Progress
 from .text import Text

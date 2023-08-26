@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Tuple
 from sulguk.render.numbers import NumberFormat
 from .entities import (
     Blockquote, Bold, Code, Entity, Group, HorizontalLine,
-    Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre,
+    Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre, Progress,
     Quote, Spoiler, Strikethrough, Text, Underline,
     Uppercase,
 )
@@ -131,6 +131,21 @@ class Transformer(HTMLParser):
             entity.add(Italic(entities=[inner]))
         return inner, entity
 
+    def _get_progress(self, attrs: Attrs) -> Entity:
+        return Progress(
+            value=float(self._find_attr("value", attrs,"0")),
+            max=float(self._find_attr("max", attrs, "1")),
+            is_meter=False,
+        )
+
+    def _get_meter(self, attrs: Attrs) -> Entity:
+        return Progress(
+            value=float(self._find_attr("value", attrs, "0")),
+            min=float(self._find_attr("min", attrs, "0")),
+            max=float(self._find_attr("max", attrs, "1")),
+            is_meter=True,
+        )
+
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
@@ -157,7 +172,7 @@ class Transformer(HTMLParser):
             nested = entity = self._get_a(attrs)
         elif tag in ("b", "strong"):
             nested = entity = Bold()
-        elif tag in ("i", "em"):
+        elif tag in ("i", "em", "cite"):
             nested = entity = Italic()
         elif tag in ("s", "strike", "del"):
             nested = entity = Strikethrough()
@@ -165,7 +180,7 @@ class Transformer(HTMLParser):
             nested = entity = self._get_code(attrs)
         elif tag in ("div",):
             nested = entity = Group(block=True)
-        elif tag in ("span",):
+        elif tag in ("span", "data"):
             nested = entity = self._get_span(attrs)
         elif tag in ("tg-spoiler",):
             nested = entity = Spoiler()
@@ -179,6 +194,10 @@ class Transformer(HTMLParser):
             nested = entity = self._get_pre(attrs)
         elif tag in ("blockquote",):
             nested = entity = Blockquote()
+        elif tag in ("progress",):
+            nested = entity = self._get_progress(attrs)
+        elif tag in ("meter",):
+            nested = entity = self._get_meter(attrs)
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
             nested, entity = self._get_h(tag, attrs)
         else:
