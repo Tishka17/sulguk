@@ -107,6 +107,12 @@ class Transformer(HTMLParser):
         )
         return Pre(language=language)
 
+    def _get_mark(self, attrs: Attrs):
+        inner = Group()
+        entity = Group()
+        entity.add(Italic(entities=[Bold(entities=[inner])]))
+        return inner, entity
+
     def _get_h(self, tag: str, attrs: Attrs):
         inner = Group()
         entity = Group(block=True)
@@ -172,16 +178,20 @@ class Transformer(HTMLParser):
             nested = entity = self._get_a(attrs)
         elif tag in ("b", "strong"):
             nested = entity = Bold()
-        elif tag in ("i", "em", "cite"):
+        elif tag in ("i", "em", "cite", "var"):
             nested = entity = Italic()
         elif tag in ("s", "strike", "del"):
             nested = entity = Strikethrough()
         elif tag in ("code",):
             nested = entity = self._get_code(attrs)
-        elif tag in ("div",):
+        elif tag in ("kbd", "samp", ):
+            nested = entity = Code()
+        elif tag in ("div", "footer", "header", "main", "nav", "section"):
             nested = entity = Group(block=True)
-        elif tag in ("span", "data"):
+        elif tag in ("span", ):
             nested = entity = self._get_span(attrs)
+        elif tag in ("output", "data", "time"):
+            nested = entity = Group()
         elif tag in ("tg-spoiler",):
             nested = entity = Spoiler()
         elif tag in ("p",):
@@ -200,6 +210,8 @@ class Transformer(HTMLParser):
             nested = entity = self._get_meter(attrs)
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
             nested, entity = self._get_h(tag, attrs)
+        elif tag in ("mark", ):
+            nested, entity = self._get_mark(attrs)
         else:
             raise ValueError(f"Unsupported tag: {tag}")
         self.current.add(entity)
