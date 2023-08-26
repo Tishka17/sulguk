@@ -140,3 +140,18 @@ Additional tags:
 * `<q>` - a quoted text
 * `<blockquote>` - a block quote. Like a paragraph with indentation
 * `<h1>`-`<h6>` - text headers, styled using available telegram options
+* `<noscirpt>` - contents is shown as not scripting is supported
+* `<cite>`, `<var>` - italic
+* `<progress>`, `<meter>` are rendered using emoji (🟩🟩🟩🟨⬜️⬜️)
+* `<kbd>`, `<samp>` - preformatted text
+
+Tags which are treated as block elements (like `<div>`):
+`<footer>`, `<header>`, `<main>`, `<nav>`, `<section>`
+
+Tags which are treated as inline elements (like `<span>`):
+`<html>`, `<body>`, `<output>`, `<data>`, `<time>`
+
+
+Tags which contents is ignored:
+
+`<head>`, `<link>`, `<meta>`, `<script>`, `<style>`, `<template>`, `<title>`
