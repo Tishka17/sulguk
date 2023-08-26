@@ -5,7 +5,7 @@ from sulguk.render.numbers import NumberFormat
 from .entities import (
     Blockquote, Bold, Code, Entity, Group, HorizontalLine,
     Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre, Progress,
-    Quote, Spoiler, Strikethrough, Text, Underline,
+    Quote, Spoiler, Strikethrough, Stub, Text, Underline,
     Uppercase,
 )
 
@@ -139,7 +139,7 @@ class Transformer(HTMLParser):
 
     def _get_progress(self, attrs: Attrs) -> Entity:
         return Progress(
-            value=float(self._find_attr("value", attrs,"0")),
+            value=float(self._find_attr("value", attrs, "0")),
             max=float(self._find_attr("max", attrs, "1")),
             is_meter=False,
         )
@@ -167,8 +167,16 @@ class Transformer(HTMLParser):
             attrs: Attrs,
     ) -> None:
         tag = tag.lower()
-
-        if tag in ("ul",):
+        # special
+        if tag in ("html", "noscript", "body"):
+            nested = entity = Group()
+        elif tag in (
+                "head", "link", "meta", "script", "style",
+                "template", "title",
+        ):
+            nested = entity = Stub()
+        # normal
+        elif tag in ("ul",):
             nested = entity = self._get_ul(attrs)
         elif tag in ("ol",):
             nested = entity = self._get_ol(attrs)
@@ -184,11 +192,11 @@ class Transformer(HTMLParser):
             nested = entity = Strikethrough()
         elif tag in ("code",):
             nested = entity = self._get_code(attrs)
-        elif tag in ("kbd", "samp", ):
+        elif tag in ("kbd", "samp",):
             nested = entity = Code()
         elif tag in ("div", "footer", "header", "main", "nav", "section"):
             nested = entity = Group(block=True)
-        elif tag in ("span", ):
+        elif tag in ("span",):
             nested = entity = self._get_span(attrs)
         elif tag in ("output", "data", "time"):
             nested = entity = Group()
@@ -210,7 +218,7 @@ class Transformer(HTMLParser):
             nested = entity = self._get_meter(attrs)
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
             nested, entity = self._get_h(tag, attrs)
-        elif tag in ("mark", ):
+        elif tag in ("mark",):
             nested, entity = self._get_mark(attrs)
         else:
             raise ValueError(f"Unsupported tag: {tag}")
