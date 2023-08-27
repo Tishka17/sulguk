@@ -2,10 +2,28 @@ from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
 from sulguk.render.numbers import NumberFormat
+
 from .entities import (
-    Blockquote, Bold, Code, Entity, Group, HorizontalLine,
-    Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre, Progress,
-    Quote, Spoiler, Strikethrough, Stub, Text, Underline,
+    Blockquote,
+    Bold,
+    Code,
+    Entity,
+    Group,
+    HorizontalLine,
+    Italic,
+    Link,
+    ListGroup,
+    ListItem,
+    NewLine,
+    Paragraph,
+    Pre,
+    Progress,
+    Quote,
+    Spoiler,
+    Strikethrough,
+    Stub,
+    Text,
+    Underline,
     Uppercase,
 )
 
@@ -36,10 +54,10 @@ class Transformer(HTMLParser):
         self.current.add(Text(data))
 
     def _find_attr(
-            self,
-            name: str,
-            attrs: Attrs,
-            default: Any = "",
+        self,
+        name: str,
+        attrs: Attrs,
+        default: Any = "",
     ) -> Optional[str]:
         return next((value for key, value in attrs if key == name), default)
 
@@ -99,7 +117,7 @@ class Transformer(HTMLParser):
         classes = self._get_classes(attrs)
         language = next(
             (
-                c[len(LANG_CLASS_PREFIX):]
+                c[len(LANG_CLASS_PREFIX) :]
                 for c in classes
                 if c.startswith(LANG_CLASS_PREFIX)
             ),
@@ -121,9 +139,9 @@ class Transformer(HTMLParser):
             entity.add(
                 Bold(
                     entities=[
-                        Underline(entities=[Uppercase(entities=[inner])])
-                    ]
-                )
+                        Underline(entities=[Uppercase(entities=[inner])]),
+                    ],
+                ),
             )
         elif tag == "h2":
             entity.add(Bold(entities=[Underline(entities=[inner])]))
@@ -162,17 +180,22 @@ class Transformer(HTMLParser):
         self.current.add(entity)
 
     def handle_starttag(
-            self,
-            tag: str,
-            attrs: Attrs,
+        self,
+        tag: str,
+        attrs: Attrs,
     ) -> None:
         tag = tag.lower()
         # special
         if tag in ("html", "noscript", "body"):
             nested = entity = Group()
         elif tag in (
-                "head", "link", "meta", "script", "style",
-                "template", "title",
+            "head",
+            "link",
+            "meta",
+            "script",
+            "style",
+            "template",
+            "title",
         ):
             nested = entity = Stub()
         # normal
@@ -192,7 +215,7 @@ class Transformer(HTMLParser):
             nested = entity = Strikethrough()
         elif tag in ("code",):
             nested = entity = self._get_code(attrs)
-        elif tag in ("kbd", "samp",):
+        elif tag in ("kbd", "samp"):
             nested = entity = Code()
         elif tag in ("div", "footer", "header", "main", "nav", "section"):
             nested = entity = Group(block=True)

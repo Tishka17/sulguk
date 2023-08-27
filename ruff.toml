@@ -1,0 +1,22 @@
+line-length = 88
+src = ["src/sulguk"]
+
+select = [
+    "E",
+    "F",
+    "BLE",
+    "B",
+    "COM",
+    "C4",
+    "ERA",
+    "T20",
+    "I",
+    "N",
+    "ASYNC",
+    "PIE",
+    "RUF",
+]
+
+ignore = [
+    "RUF001",
+]

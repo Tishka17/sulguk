@@ -3,6 +3,7 @@ from typing import Optional
 
 from sulguk.data import MessageEntity
 from sulguk.render import State, TextMode
+
 from .base import DecoratedEntity, Group
 
 
@@ -41,7 +42,9 @@ class Underline(DecoratedEntity):
 class Strikethrough(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="strikethrough", offset=offset, length=length
+            type="strikethrough",
+            offset=offset,
+            length=length,
         )
 
 
@@ -53,10 +56,11 @@ class Spoiler(DecoratedEntity):
 
 @dataclass
 class Code(DecoratedEntity):
-
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="code", offset=offset, length=length,
+            type="code",
+            offset=offset,
+            length=length,
         )
 
 
@@ -113,5 +117,8 @@ class Pre(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="pre", offset=offset, length=length, language=self.language,
+            type="pre",
+            offset=offset,
+            length=length,
+            language=self.language,
         )
