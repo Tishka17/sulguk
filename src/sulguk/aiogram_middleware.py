@@ -15,7 +15,11 @@ from aiogram.methods import (
     TelegramMethod,
 )
 from aiogram.methods.base import TelegramType
-from aiogram.types import UNSET_PARSE_MODE, InlineQueryResult, InlineQueryResultArticle
+from aiogram.types import (
+    UNSET_PARSE_MODE,
+    InlineQueryResult,
+    InlineQueryResultArticle,
+)
 
 from sulguk.data import SULGUK_PARSE_MODE
 
@@ -37,19 +41,17 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         }
 
     async def __call__(
-        self,
-        make_request: NextRequestMiddlewareType[TelegramType],
-        bot: Bot,
-        method: TelegramMethod[TelegramType],
+            self,
+            make_request: NextRequestMiddlewareType[TelegramType],
+            bot: Bot,
+            method: TelegramMethod[TelegramType],
     ) -> Response[TelegramType]:
         handler = self.handlers.get(type(method), self._process_generic)
         handler(method, bot)
         return await make_request(bot, method)
 
     def _process_inline_query_result(
-        self,
-        method: InlineQueryResult,
-        bot: Bot,
+            self, method: InlineQueryResult, bot: Bot,
     ) -> None:
         if isinstance(method, InlineQueryResultArticle):
             target = method.input_message_content
@@ -58,46 +60,34 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         self._transform_text_caption(target, bot)
 
     def _process_answer_inline_query(
-        self,
-        method: AnswerInlineQuery,
-        bot: Bot,
+            self, method: AnswerInlineQuery, bot: Bot,
     ) -> None:
         for result in method.results:
             self._process_inline_query_result(result, bot)
 
     def _process_answer_web_app_query(
-        self,
-        method: AnswerWebAppQuery,
-        bot: Bot,
+            self, method: AnswerWebAppQuery, bot: Bot,
     ) -> None:
         self._process_inline_query_result(method.result, bot)
 
     def _process_edit_message_media(
-        self,
-        method: EditMessageMedia,
-        bot: Bot,
+            self, method: EditMessageMedia, bot: Bot,
     ) -> None:
         self._transform_text_caption(method.media, bot)
 
     def _process_send_media_group(
-        self,
-        method: SendMediaGroup,
-        bot: Bot,
+            self, method: SendMediaGroup, bot: Bot,
     ) -> None:
         for media in method.media:
             self._transform_text_caption(media, bot)
 
     def _process_generic(
-        self,
-        method: Any,
-        bot: Bot,
+            self, method: Any, bot: Bot,
     ) -> None:
         self._transform_text_caption(method, bot)
 
     def _transform_text_caption(
-        self,
-        method: Any,
-        bot: Bot,
+            self, method: Any, bot: Bot,
     ) -> None:
         if not self._is_parse_mode_supported(method, bot):
             return

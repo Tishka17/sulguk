@@ -54,10 +54,10 @@ class Transformer(HTMLParser):
         self.current.add(Text(data))
 
     def _find_attr(
-        self,
-        name: str,
-        attrs: Attrs,
-        default: Any = "",
+            self,
+            name: str,
+            attrs: Attrs,
+            default: Any = "",
     ) -> Optional[str]:
         return next((value for key, value in attrs if key == name), default)
 
@@ -117,7 +117,7 @@ class Transformer(HTMLParser):
         classes = self._get_classes(attrs)
         language = next(
             (
-                c[len(LANG_CLASS_PREFIX) :]
+                c[len(LANG_CLASS_PREFIX):]
                 for c in classes
                 if c.startswith(LANG_CLASS_PREFIX)
             ),
@@ -180,22 +180,17 @@ class Transformer(HTMLParser):
         self.current.add(entity)
 
     def handle_starttag(
-        self,
-        tag: str,
-        attrs: Attrs,
+            self,
+            tag: str,
+            attrs: Attrs,
     ) -> None:
         tag = tag.lower()
         # special
         if tag in ("html", "noscript", "body"):
             nested = entity = Group()
         elif tag in (
-            "head",
-            "link",
-            "meta",
-            "script",
-            "style",
-            "template",
-            "title",
+                "head", "link", "meta", "script", "style",
+                "template", "title",
         ):
             nested = entity = Stub()
         # normal

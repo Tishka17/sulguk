@@ -99,18 +99,16 @@ class Canvas:
         if self.text_mode is TextMode.NORMAL:
             text = fix_text_normal(
                 text=text,
-                trim_start=self.state
-                in (
-                    State.START,
-                    State.NEW_LINE,
-                    State.EMPTY_LINE,
-                    State.SPACE,
+                trim_start=self.state in (
+                    State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE,
                 ),
             )
         elif self.text_mode is TextMode.PRE:
             text = fix_text_pre(
                 text=text,
-                trim_start=self.state in (State.EMPTY_LINE,),
+                trim_start=self.state in (
+                    State.EMPTY_LINE,
+                ),
             )
         if not text:
             return

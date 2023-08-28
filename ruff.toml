@@ -1,4 +1,4 @@
-line-length = 88
+line-length = 79
 src = ["src/sulguk"]
 
 select = [
