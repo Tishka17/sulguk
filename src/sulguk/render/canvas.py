@@ -26,6 +26,7 @@ def fix_text_normal(text: str, trim_start: bool) -> str:
     text = " ".join(NORMAL_SPACES.split(text))
     return text
 
+
 def fix_text_pre(text: str, trim_start: bool) -> str:
     if trim_start and text.startswith("\n"):
         text = text[1:]
@@ -99,7 +100,7 @@ class Canvas:
             text = fix_text_normal(
                 text=text,
                 trim_start=self.state in (
-                   State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE,
+                    State.START, State.NEW_LINE, State.EMPTY_LINE, State.SPACE,
                 ),
             )
         elif self.text_mode is TextMode.PRE:
@@ -119,4 +120,3 @@ class Canvas:
             self.state = State.NEW_LINE
         else:
             self.state = State.IN_TEXT
-
