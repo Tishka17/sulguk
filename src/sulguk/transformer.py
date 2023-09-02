@@ -167,8 +167,11 @@ class Transformer(HTMLParser):
             attrs: Attrs,
     ) -> None:
         tag = tag.lower()
+        # single tags, no closing
+        if tag in ("br", "hr"):
+            return self.handle_startendtag(tag, attrs)
         # special
-        if tag in ("html", "noscript", "body"):
+        elif tag in ("html", "noscript", "body"):
             nested = entity = Group()
         elif tag in (
                 "head", "link", "meta", "script", "style",
@@ -226,4 +229,7 @@ class Transformer(HTMLParser):
         self.entities.append(nested)
 
     def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        if tag in ("br", "hr"):
+            raise ValueError(f"Invalid closing tag: {tag}")
         self.entities.pop()
