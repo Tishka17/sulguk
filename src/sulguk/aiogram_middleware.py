@@ -7,15 +7,22 @@ from aiogram.client.session.middlewares.base import (
     NextRequestMiddlewareType,
 )
 from aiogram.methods import (
-    Response, TelegramMethod, AnswerInlineQuery, AnswerWebAppQuery,
-    EditMessageMedia, SendMediaGroup,
+    AnswerInlineQuery,
+    AnswerWebAppQuery,
+    EditMessageMedia,
+    Response,
+    SendMediaGroup,
+    TelegramMethod,
 )
 from aiogram.methods.base import TelegramType
 from aiogram.types import (
-    InlineQueryResult, InlineQueryResultArticle, UNSET_PARSE_MODE
+    UNSET_PARSE_MODE,
+    InlineQueryResult,
+    InlineQueryResultArticle,
 )
 
 from sulguk.data import SULGUK_PARSE_MODE
+
 from .wrapper import transform_html
 
 logger = logging.getLogger(__name__)
@@ -30,7 +37,7 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             EditMessageMedia: self._process_edit_message_media,
             SendMediaGroup: self._process_send_media_group,
             AnswerWebAppQuery: self._process_answer_web_app_query,
-            AnswerInlineQuery: self._process_answer_inline_query
+            AnswerInlineQuery: self._process_answer_inline_query,
         }
 
     async def __call__(

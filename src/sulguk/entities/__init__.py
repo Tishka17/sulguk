@@ -25,8 +25,18 @@ __all__ = [
 
 from .base import DecoratedEntity, Entity, Group
 from .decoration import (
-    Blockquote, Bold, Code, Italic, Link, Paragraph, Pre,
-    Quote, Spoiler, Strikethrough, Underline, Uppercase,
+    Blockquote,
+    Bold,
+    Code,
+    Italic,
+    Link,
+    Paragraph,
+    Pre,
+    Quote,
+    Spoiler,
+    Strikethrough,
+    Underline,
+    Uppercase,
 )
 from .list import ListGroup, ListItem
 from .no_contents import HorizontalLine, NewLine

@@ -2,10 +2,28 @@ from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
 from sulguk.render.numbers import NumberFormat
+
 from .entities import (
-    Blockquote, Bold, Code, Entity, Group, HorizontalLine,
-    Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre, Progress,
-    Quote, Spoiler, Strikethrough, Stub, Text, Underline,
+    Blockquote,
+    Bold,
+    Code,
+    Entity,
+    Group,
+    HorizontalLine,
+    Italic,
+    Link,
+    ListGroup,
+    ListItem,
+    NewLine,
+    Paragraph,
+    Pre,
+    Progress,
+    Quote,
+    Spoiler,
+    Strikethrough,
+    Stub,
+    Text,
+    Underline,
     Uppercase,
 )
 
@@ -121,9 +139,9 @@ class Transformer(HTMLParser):
             entity.add(
                 Bold(
                     entities=[
-                        Underline(entities=[Uppercase(entities=[inner])])
-                    ]
-                )
+                        Underline(entities=[Uppercase(entities=[inner])]),
+                    ],
+                ),
             )
         elif tag == "h2":
             entity.add(Bold(entities=[Underline(entities=[inner])]))
@@ -195,7 +213,7 @@ class Transformer(HTMLParser):
             nested = entity = Strikethrough()
         elif tag in ("code",):
             nested = entity = self._get_code(attrs)
-        elif tag in ("kbd", "samp",):
+        elif tag in ("kbd", "samp"):
             nested = entity = Code()
         elif tag in ("div", "footer", "header", "main", "nav", "section"):
             nested = entity = Group(block=True)
