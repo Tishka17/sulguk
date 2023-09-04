@@ -64,13 +64,18 @@ class Transformer(HTMLParser):
     def _get_classes(self, attrs: Attrs):
         return self._find_attr("class", attrs).split()
 
-    def _get_url(self, attrs: Attrs) -> Entity:
-        for name in ('href', 'src'):
-            url = self._find_attr(name, attrs)
-            if url:
-                return Link(url=url)
+    def _get_a(self, attrs: Attrs) -> Entity:
+        url = self._find_attr('href', attrs)
+        if url:
+            return Link(url=url)
         return Group()
-
+    
+    def _get_img(self, attrs: Attrs) -> Entity:
+        url = self._find_attr('src', attrs)
+        if url:
+            return Link(url=url)
+        return Group()
+    
     def _get_ul(self, attrs: Attrs) -> Entity:
         return ListGroup(numbered=False)
 
@@ -203,8 +208,10 @@ class Transformer(HTMLParser):
             nested = entity = self._get_ol(attrs)
         elif tag in ("li",):
             nested = entity = self._get_li(attrs)
-        elif tag in ("a", 'img'):
-            nested = entity = self._get_url(attrs)
+        elif tag in ("a", ):
+            nested = entity = self._get_a(attrs)
+        elif tag in ("img",):
+            nested = entity = self._get_img(attrs)
         elif tag in ("b", "strong"):
             nested = entity = Bold()
         elif tag in ("i", "em", "cite", "var"):
