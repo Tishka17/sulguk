@@ -100,10 +100,16 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             result = transform_html(method.text)
             method.text = result.text
             method.entities = result.entities
+        elif hasattr(method, "message_text"):
+            result = transform_html(method.message_text)
+            method.message_text = result.text
+            method.entities = result.entities
         else:
             raise ValueError(
-                "The method does not have a 'caption' or 'text' attribute.",
+                f"Object of type {type(method)} does not have "
+                f"a 'caption', 'text' or 'message_text' attribute.",
             )
+
         method.parse_mode = None
 
     def _is_parse_mode_supported(self, method: Any, bot: Bot) -> bool:
