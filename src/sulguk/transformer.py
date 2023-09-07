@@ -2,7 +2,6 @@ from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
 from sulguk.render.numbers import NumberFormat
-
 from .entities import (
     Blockquote,
     Bold,
@@ -39,7 +38,7 @@ OL_FORMAT = {
 
 LANG_CLASS_PREFIX = "language-"
 
-NO_CLOSING_TAGS = ("br", "hr", "meta", "link")
+NO_CLOSING_TAGS = ("br", "hr", "meta", "link", "img")
 
 
 class Transformer(HTMLParser):
@@ -71,13 +70,20 @@ class Transformer(HTMLParser):
         if url:
             return Link(url=url)
         return Group()
-    
-    def _get_img(self, attrs: Attrs) -> Entity:
+
+    def _get_img(self, attrs: Attrs) -> Optional[Entity]:
         url = self._find_attr("src", attrs)
-        if url:
-            return Link(url=url)
-        return Group()
-    
+        text = self._find_attr("alt", attrs, url)
+        if not text and not url:
+            return None
+
+        text_entity = Text(text="🖼️" + text)
+        if not url:
+            return text_entity
+        link = Link(url=url)
+        link.add(text_entity)
+        return link
+
     def _get_ul(self, attrs: Attrs) -> Entity:
         return ListGroup(numbered=False)
 
@@ -182,11 +188,14 @@ class Transformer(HTMLParser):
             entity = NewLine()
         elif tag == "hr":
             entity = HorizontalLine()
+        elif tag in ("img",):
+            entity = self._get_img(attrs)
         elif tag in ("meta", "link"):
             return  # ignored tag
         else:
             raise ValueError(f"Unsupported single tag: `{tag}`")
-        self.current.add(entity)
+        if entity:
+            self.current.add(entity)
 
     def handle_starttag(
             self,
@@ -209,10 +218,8 @@ class Transformer(HTMLParser):
             nested = entity = self._get_ol(attrs)
         elif tag in ("li",):
             nested = entity = self._get_li(attrs)
-        elif tag in ("a", ):
+        elif tag in ("a",):
             nested = entity = self._get_a(attrs)
-        elif tag in ("img",):
-            nested = entity = self._get_img(attrs)
         elif tag in ("b", "strong"):
             nested = entity = Bold()
         elif tag in ("i", "em", "cite", "var"):

@@ -45,8 +45,6 @@ PRE_PLAIN = "1\n\n    2\n\n3"
 PRE_P_HTML = "<p>1</p>\n<pre>\n    2</pre>"
 PRE_P_PLAIN = "1\n\n    2\n\n"
 
-IMG_HTML = '<img src="https://google.com">'
-IMG_URL = "https://google.com"
 
 @pytest.mark.parametrize("html, plain, name", [
     (SPACES_SPAN_HTML, SPACES_SPAN_PLAIN, "span"),
@@ -65,16 +63,3 @@ def test_spaces(html, plain, name):
     print(repr(plain))
     print(repr(html))
     assert result.text == plain
-
-
-
-@pytest.mark.parametrize("html, url", [
-    (IMG_HTML, IMG_URL),
-])
-def test_link_extracted(html, url):
-    result = transform_html(html)
-    assert result.text == ""
-    assert len(result.entities) == 1
-    entity = result.entities[0]
-    assert entity['type'] == 'text_link'
-    assert entity['url'] == url
