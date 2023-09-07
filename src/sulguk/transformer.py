@@ -39,6 +39,8 @@ OL_FORMAT = {
 
 LANG_CLASS_PREFIX = "language-"
 
+NO_CLOSING_TAGS = ("br", "hr", "meta", "link")
+
 
 class Transformer(HTMLParser):
     def __init__(self):
@@ -65,13 +67,13 @@ class Transformer(HTMLParser):
         return self._find_attr("class", attrs).split()
 
     def _get_a(self, attrs: Attrs) -> Entity:
-        url = self._find_attr('href', attrs)
+        url = self._find_attr("href", attrs)
         if url:
             return Link(url=url)
         return Group()
     
     def _get_img(self, attrs: Attrs) -> Entity:
-        url = self._find_attr('src', attrs)
+        url = self._find_attr("src", attrs)
         if url:
             return Link(url=url)
         return Group()
@@ -180,6 +182,8 @@ class Transformer(HTMLParser):
             entity = NewLine()
         elif tag == "hr":
             entity = HorizontalLine()
+        elif tag in ("meta", "link"):
+            return  # ignored tag
         else:
             raise ValueError(f"Unsupported single tag: `{tag}`")
         self.current.add(entity)
@@ -191,15 +195,12 @@ class Transformer(HTMLParser):
     ) -> None:
         tag = tag.lower()
         # single tags, no closing
-        if tag in ("br", "hr"):
+        if tag in NO_CLOSING_TAGS:
             return self.handle_startendtag(tag, attrs)
         # special
         elif tag in ("html", "noscript", "body"):
             nested = entity = Group()
-        elif tag in (
-                "head", "link", "meta", "script", "style",
-                "template", "title",
-        ):
+        elif tag in ("head", "script", "style", "template", "title"):
             nested = entity = Stub()
         # normal
         elif tag in ("ul",):
@@ -255,6 +256,6 @@ class Transformer(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         tag = tag.lower()
-        if tag in ("br", "hr"):
+        if tag in NO_CLOSING_TAGS:
             raise ValueError(f"Invalid closing tag: {tag}")
         self.entities.pop()
