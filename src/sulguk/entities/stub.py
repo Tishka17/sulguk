@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from sulguk.render import State
 
 from .base import Entity

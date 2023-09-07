@@ -3,9 +3,26 @@ from typing import Any, List, Optional, Tuple
 
 from sulguk.render.numbers import NumberFormat
 from .entities import (
-    Blockquote, Bold, Code, Entity, Group, HorizontalLine,
-    Italic, Link, ListGroup, ListItem, NewLine, Paragraph, Pre, Progress,
-    Quote, Spoiler, Strikethrough, Stub, Text, Underline,
+    Blockquote,
+    Bold,
+    Code,
+    Entity,
+    Group,
+    HorizontalLine,
+    Italic,
+    Link,
+    ListGroup,
+    ListItem,
+    NewLine,
+    Paragraph,
+    Pre,
+    Progress,
+    Quote,
+    Spoiler,
+    Strikethrough,
+    Stub,
+    Text,
+    Underline,
     Uppercase,
 )
 
@@ -20,6 +37,8 @@ OL_FORMAT = {
 }
 
 LANG_CLASS_PREFIX = "language-"
+
+NO_CLOSING_TAGS = ("br", "hr", "meta", "link", "img")
 
 
 class Transformer(HTMLParser):
@@ -50,8 +69,20 @@ class Transformer(HTMLParser):
         url = self._find_attr("href", attrs)
         if url:
             return Link(url=url)
-        else:
-            return Group()
+        return Group()
+
+    def _get_img(self, attrs: Attrs) -> Optional[Entity]:
+        url = self._find_attr("src", attrs)
+        text = self._find_attr("alt", attrs, url)
+        if not text and not url:
+            return None
+
+        text_entity = Text(text="🖼️" + text)
+        if not url:
+            return text_entity
+        link = Link(url=url)
+        link.add(text_entity)
+        return link
 
     def _get_ul(self, attrs: Attrs) -> Entity:
         return ListGroup(numbered=False)
@@ -121,9 +152,9 @@ class Transformer(HTMLParser):
             entity.add(
                 Bold(
                     entities=[
-                        Underline(entities=[Uppercase(entities=[inner])])
-                    ]
-                )
+                        Underline(entities=[Uppercase(entities=[inner])]),
+                    ],
+                ),
             )
         elif tag == "h2":
             entity.add(Bold(entities=[Underline(entities=[inner])]))
@@ -157,9 +188,14 @@ class Transformer(HTMLParser):
             entity = NewLine()
         elif tag == "hr":
             entity = HorizontalLine()
+        elif tag in ("img",):
+            entity = self._get_img(attrs)
+        elif tag in ("meta", "link"):
+            return  # ignored tag
         else:
             raise ValueError(f"Unsupported single tag: `{tag}`")
-        self.current.add(entity)
+        if entity:
+            self.current.add(entity)
 
     def handle_starttag(
             self,
@@ -168,15 +204,12 @@ class Transformer(HTMLParser):
     ) -> None:
         tag = tag.lower()
         # single tags, no closing
-        if tag in ("br", "hr"):
+        if tag in NO_CLOSING_TAGS:
             return self.handle_startendtag(tag, attrs)
         # special
         elif tag in ("html", "noscript", "body"):
             nested = entity = Group()
-        elif tag in (
-                "head", "link", "meta", "script", "style",
-                "template", "title",
-        ):
+        elif tag in ("head", "script", "style", "template", "title"):
             nested = entity = Stub()
         # normal
         elif tag in ("ul",):
@@ -195,7 +228,7 @@ class Transformer(HTMLParser):
             nested = entity = Strikethrough()
         elif tag in ("code",):
             nested = entity = self._get_code(attrs)
-        elif tag in ("kbd", "samp",):
+        elif tag in ("kbd", "samp"):
             nested = entity = Code()
         elif tag in ("div", "footer", "header", "main", "nav", "section"):
             nested = entity = Group(block=True)
@@ -230,6 +263,6 @@ class Transformer(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         tag = tag.lower()
-        if tag in ("br", "hr"):
+        if tag in NO_CLOSING_TAGS:
             raise ValueError(f"Invalid closing tag: {tag}")
         self.entities.pop()

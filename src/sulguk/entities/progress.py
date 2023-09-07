@@ -1,10 +1,8 @@
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
 
-from sulguk.data import NumberFormat
-from sulguk.render import State, int_to_number
+from sulguk.render import State
 
-from .base import Entity, Group
+from .base import Entity
 
 
 @dataclass
