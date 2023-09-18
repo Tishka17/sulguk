@@ -123,12 +123,9 @@ class Transformer(HTMLParser):
             return Spoiler()
         return Group()
 
-    def _get_code(self, attrs: Attrs) -> Entity:
-        return Code()
-
-    def _get_pre(self, attrs: Attrs) -> Entity:
+    def _get_language_class(self, attrs: Attrs):
         classes = self._get_classes(attrs)
-        language = next(
+        return next(
             (
                 c[len(LANG_CLASS_PREFIX):]
                 for c in classes
@@ -136,7 +133,12 @@ class Transformer(HTMLParser):
             ),
             None,
         )
-        return Pre(language=language)
+
+    def _get_code(self, attrs: Attrs) -> Entity:
+        return Code(language=self._get_language_class(attrs))
+
+    def _get_pre(self, attrs: Attrs) -> Entity:
+        return Pre(language=self._get_language_class(attrs))
 
     def _get_mark(self, attrs: Attrs):
         inner = Group()
