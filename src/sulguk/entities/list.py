@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from sulguk.data import NumberFormat
 from sulguk.render import State, int_to_number
-
 from .base import Entity, Group
 
 

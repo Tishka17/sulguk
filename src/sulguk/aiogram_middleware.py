@@ -22,7 +22,6 @@ from aiogram.types import (
 )
 
 from sulguk.data import SULGUK_PARSE_MODE
-
 from .wrapper import transform_html
 
 logger = logging.getLogger(__name__)

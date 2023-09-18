@@ -1,7 +1,6 @@
 from abc import ABC
 
 from sulguk.render import State
-
 from .base import Entity
 
 

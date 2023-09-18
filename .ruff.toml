@@ -1,5 +1,5 @@
 line-length = 79
-src = ["src/sulguk"]
+src = ["src"]
 
 select = [
     "E",
@@ -20,3 +20,9 @@ select = [
 ignore = [
     "RUF001",
 ]
+
+[isort]
+no-lines-before = ["local-folder"]
+
+[flake8-tidy-imports]
+ban-relative-imports = "parents"
