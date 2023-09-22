@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from sulguk.render.state import MessageEntity, State
 from .transformer import Transformer
@@ -11,7 +11,11 @@ class RenderResult:
     entities: List[MessageEntity]
 
 
-def transform_html(raw_html: str) -> RenderResult:
+def transform_html(raw_html: Optional[str]) -> RenderResult:
+
+    if raw_html is None:
+        return RenderResult(text="", entities=[])
+
     transformer = Transformer()
     transformer.feed(raw_html)
     state = State()
