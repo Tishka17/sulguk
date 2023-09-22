@@ -13,7 +13,7 @@ class RenderResult:
 
 def transform_html(raw_html: Optional[str]) -> RenderResult:
 
-    if raw_html is None:
+    if raw_html is None or raw_html.strip() == "":
         return RenderResult(text="", entities=[])
 
     transformer = Transformer()
