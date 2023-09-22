@@ -92,15 +92,18 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             return
 
         if hasattr(method, "caption"):
-            result = transform_html(method.caption)
+            text =  str(method.caption or '')
+            result = transform_html(text)
             method.caption = result.text
             method.caption_entities = result.entities
         elif hasattr(method, "text"):
-            result = transform_html(method.text)
+            text =  str(method.text or '')
+            result = transform_html(text)
             method.text = result.text
             method.entities = result.entities
         elif hasattr(method, "message_text"):
-            result = transform_html(method.message_text)
+            text =  str(method.message_text or '')
+            result = transform_html(text)
             method.message_text = result.text
             method.entities = result.entities
         else:
