@@ -114,7 +114,7 @@ await bot.send_message(
 For all supported tags unknown attributes are ignored as well as unknown classes.
 Unsupported tags are raising an error. 
 
-Standard telegram tags (with some changes):
+#### Standard telegram tags (with some changes):
 * `<a>` - a hyperlink with `href` attribute 
 * `<b>`, `<strong>` - a bold text
 * `<i>`, `<em>` - an italic text
@@ -125,7 +125,10 @@ Standard telegram tags (with some changes):
 * `<pre>` with optional `class="language-<name>"` - a preformatted block with code. `<name>` will be sent as a language attribute in telegram.
 * `<code>` - an inline preformatted element. 
 
-Additional tags:
+**Note:** In standard Telegram HTML you can set a preformatted text language nesting `<code class="language-<name>">` in `<pre>` tag. This works when it is an only child. But any additional symbol outside of `<code>` breaks it.
+The same behavior is supported in sulguk. Otherwise, you can set the language on `<pre>` tag itself.
+
+#### Additional tags:
 * `<br/>` - new line
 * `<hr/>` - horizontal line
 * `<ul>` - unordered list
@@ -144,14 +147,40 @@ Additional tags:
 * `<cite>`, `<var>` - italic
 * `<progress>`, `<meter>` are rendered using emoji (🟩🟩🟩🟨⬜️⬜️)
 * `<kbd>`, `<samp>` - preformatted text
+* `<img>` - as a link with picture emoji before. `alt` text is used if provided.
 
-Tags which are treated as block elements (like `<div>`):
+#### Tags which are treated as block elements (like `<div>`):
 `<footer>`, `<header>`, `<main>`, `<nav>`, `<section>`
 
-Tags which are treated as inline elements (like `<span>`):
+#### Tags which are treated as inline elements (like `<span>`):
 `<html>`, `<body>`, `<output>`, `<data>`, `<time>`
 
-
-Tags which contents is ignored:
+#### Tags which contents is ignored:
 
 `<head>`, `<link>`, `<meta>`, `<script>`, `<style>`, `<template>`, `<title>`
+
+
+## Command line utility for channel management
+
+1. Install with addons
+```shell
+pip install 'sulguk[cli]'
+```
+
+2. Set environment variable `BOT_TOKEN`
+
+```shell
+export BOT_TOKEN="your telegram token"
+```
+
+3. Send HTML file as a message to your channel. Additional files will be sent as comments to the first one. You can provide a channel name or a public link
+
+```shell
+sulguk send @chat_id file.html
+```
+
+4. If you want to, edit using the link from shell or from your tg client. Edition of comments is supported as well.
+
+```shell
+sulguk edit 'https://t.me/channel/1?comment=42' file.html
+```

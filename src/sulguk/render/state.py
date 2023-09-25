@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import List
 
 from sulguk.data import MessageEntity
-
 from .canvas import Canvas
 
 
