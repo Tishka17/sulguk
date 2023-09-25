@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Optional, Union
 from urllib.parse import urlparse, parse_qs
 
+from aiogram.types import Message, Chat
+
 
 @dataclass
 class Link:
@@ -57,3 +59,31 @@ def parse_link(link: str) -> Link:
         )
     else:
         raise LinkParseError(f"Invalid path: {parsed.path}")
+
+
+def unparse_link(link: Link) -> str:
+    if isinstance(link.group_id, str):
+        group_id = link.group_id.lstrip("@")
+    else:
+        group_id = link.group_id
+    result = f"https://t.me/{group_id}/"
+    if link.post_id:
+        result += f"{link.post_id}"
+    if link.comment_id:
+        result += f"?comment={link.comment_id}"
+    return result
+
+
+def make_link(
+        chat: Chat,
+        message: Optional[Message] = None,
+        comment: Optional[Message] = None,
+) -> Link:
+    link = Link(
+        group_id=chat.username,
+    )
+    if message:
+        link.post_id = message.message_id
+    if comment:
+        link.comment_id = comment.message_id
+    return link

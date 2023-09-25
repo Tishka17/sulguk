@@ -21,6 +21,12 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = []
+[project.optional-dependencies]
+cli = [
+    "aiogram",
+]
+[project.scripts]
+sulguk = "sulguk.post_manager.cli:cli"
 
 [project.urls]
 "Homepage" = "https://github.com/tishka17/sulguk"
