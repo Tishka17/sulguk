@@ -7,7 +7,7 @@ package-dir = { "" = "src" }
 
 [project]
 name = "sulguk"
-version = "0.5.0"
+version = "0.6.0"
 authors = [
     { name = "Andrey Tikhonov", email = "17@itishka.org" },
 ]
