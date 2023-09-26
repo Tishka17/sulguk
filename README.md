@@ -158,3 +158,29 @@ The same behavior is supported in sulguk. Otherwise, you can set the language on
 #### Tags which contents is ignored:
 
 `<head>`, `<link>`, `<meta>`, `<script>`, `<style>`, `<template>`, `<title>`
+
+
+## Command line utility for channel management
+
+1. Install with addons
+```shell
+pip install 'sulguk[cli]'
+```
+
+2. Set environment variable `BOT_TOKEN`
+
+```shell
+export BOT_TOKEN="your telegram token"
+```
+
+3. Send HTML file as a message to your channel. Additional files will be sent as comments to the first one. You can provide a channel name or a public link
+
+```shell
+sulguk send @chat_id file.html
+```
+
+4. If you want to, edit using the link from shell or from your tg client. Edition of comments is supported as well.
+
+```shell
+sulguk edit 'https://t.me/channel/1?comment=42' file.html
+```
