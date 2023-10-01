@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Chat, Message
 
 from .chat_info import get_chat
-from .exceptions import LinkedMessageNotFound
+from .exceptions import LinkedMessageNotFoundError
 from .file import load_file
 from .links import make_link, unparse_link
 from .params import SendArgs
@@ -80,7 +80,7 @@ async def send(bot: Bot, args: SendArgs):
     linked_message = await get_linked_message[args.mode](bot, chat, message)
     if not linked_message:
         logger.error("Cannot load linked message to leave a comment")
-        raise LinkedMessageNotFound("No linked message found")
+        raise LinkedMessageNotFoundError("No linked message found")
     for file in args.file[1:]:
         data = load_file(file)
         comment = await bot.send_message(
