@@ -10,5 +10,7 @@ class Emoji(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="custom_emoji", offset=offset, length=length, custom_emoji_id=self.custom_emoji_id,
+            type="custom_emoji",
+            offset=offset, length=length,
+            custom_emoji_id=self.custom_emoji_id,
         )
