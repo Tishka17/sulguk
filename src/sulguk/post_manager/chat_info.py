@@ -15,5 +15,5 @@ async def get_chat(bot: Bot, chat_id: Union[str, int]):
     except TelegramBadRequest as e:
         if "chat not found" in e.message:
             logger.error("Chat %s not found", chat_id)
-            raise ChatNotFound
+            raise ChatNotFound from e
         raise
