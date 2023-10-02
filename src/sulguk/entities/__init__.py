@@ -10,6 +10,7 @@ __all__ = [
     "Spoiler",
     "Code",
     "Uppercase",
+    "Emoji",
     "Quote",
     "Blockquote",
     "Paragraph",
@@ -38,6 +39,7 @@ from .decoration import (
     Underline,
     Uppercase,
 )
+from .emoji import Emoji
 from .list import ListGroup, ListItem
 from .no_contents import HorizontalLine, NewLine
 from .progress import Progress

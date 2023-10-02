@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 from sulguk.data import MessageEntity
 from sulguk.render import State
@@ -36,12 +36,12 @@ class Group(Entity):
 @dataclass
 class DecoratedEntity(Group):
     @abstractmethod
-    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+    def _get_entity(self, offset: int, length: int) -> Optional[MessageEntity]:
         raise NotImplementedError
 
     def render(self, state: State) -> None:
         offset = state.canvas.size
         super().render(state)
-        state.entities.append(
-            self._get_entity(offset, state.canvas.size - offset),
-        )
+        entity = self._get_entity(offset, state.canvas.size - offset)
+        if entity:
+            state.entities.append(entity)

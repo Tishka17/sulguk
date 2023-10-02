@@ -6,6 +6,7 @@ from .entities import (
     Blockquote,
     Bold,
     Code,
+    Emoji,
     Entity,
     Group,
     HorizontalLine,
@@ -185,6 +186,13 @@ class Transformer(HTMLParser):
             is_meter=True,
         )
 
+    def _get_tg_emoji(self, attrs: Attrs) -> Entity:
+        emoji_id = self._find_attr("emoji-id", attrs)
+        if emoji_id:
+            return Emoji(custom_emoji_id=emoji_id)
+        else:
+            return Group()
+
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
@@ -240,6 +248,8 @@ class Transformer(HTMLParser):
             nested = entity = Group()
         elif tag in ("tg-spoiler",):
             nested = entity = Spoiler()
+        elif tag in ("tg-emoji",):
+            nested = entity = self._get_tg_emoji(attrs)
         elif tag in ("p",):
             nested = entity = Paragraph()
         elif tag in ("u", "ins"):
