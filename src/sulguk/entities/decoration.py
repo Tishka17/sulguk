@@ -77,8 +77,6 @@ class Quote(Group):
 
 @dataclass
 class Blockquote(DecoratedEntity):
-    language: Optional[str] = None
-
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
             type="blockquote", offset=offset, length=length,
