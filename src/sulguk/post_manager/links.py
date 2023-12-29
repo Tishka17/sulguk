@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, Union
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
-from aiogram.types import Message, Chat
+from aiogram.types import Chat, Message
 
 
 @dataclass
@@ -40,16 +40,16 @@ def parse_link(link: str) -> Link:
         params = parse_qs(parsed.query)
         try:
             post_id = int(path[1])
-        except ValueError:
-            raise LinkParseError(f"Invalid post id: {path[1]}")
+        except ValueError as e:
+            raise LinkParseError(f"Invalid post id: {path[1]}") from e
         comment_id_raw = params.get("comment")
         if not comment_id_raw:
             comment_id = None
         elif len(comment_id_raw) == 1:
             try:
                 comment_id = int(comment_id_raw[0])
-            except ValueError:
-                raise LinkParseError(f"Invalid comment id: {path[1]}")
+            except ValueError as e:
+                raise LinkParseError(f"Invalid comment id: {path[1]}") from e
         else:
             raise LinkParseError(f"Cannot parse comment id: {parsed.query}")
         return Link(

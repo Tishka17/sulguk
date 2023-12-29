@@ -2,9 +2,9 @@ class ManagerError(Exception):
     pass
 
 
-class LinkedMessageNotFound(ManagerError):
+class LinkedMessageNotFoundError(ManagerError):
     pass
 
 
-class ChatNotFound(ManagerError):
+class ChatNotFoundError(ManagerError):
     pass

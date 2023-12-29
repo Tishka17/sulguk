@@ -22,10 +22,10 @@ def init_parser():
     subparsers = root.add_subparsers(dest="command")
     sender = subparsers.add_parser("send")
     sender.add_argument(
-        "destination", type=parse_link
+        "destination", type=parse_link,
     )
     sender.add_argument(
-        "file", nargs='+'
+        "file", nargs='+',
     )
     sender.add_argument(
         "-m", "--mode", choices=["poll", "getChat"],
@@ -33,7 +33,7 @@ def init_parser():
     )
     editor = subparsers.add_parser("edit")
     editor.add_argument(
-        "destination", type=parse_link
+        "destination", type=parse_link,
     )
     editor.add_argument(
         "file",

@@ -76,14 +76,11 @@ class Quote(Group):
 
 
 @dataclass
-class Blockquote(Group):
-    block: bool = True
-
-    def render(self, state: State) -> None:
-        indent = state.canvas.indent
-        state.canvas.indent += 1
-        super().render(state)
-        state.canvas.indent = indent
+class Blockquote(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(
+            type="blockquote", offset=offset, length=length,
+        )
 
 
 @dataclass
