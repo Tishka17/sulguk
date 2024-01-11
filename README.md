@@ -40,7 +40,7 @@ But this is how it is rendered in Telegram with `parse_mode="html"`:
 
 ![](https://github.com/tishka17/sulguk/blob/master/images/problem_telegram.png?raw=True)
 
-T osolve this we can convert HTML to telegram entites with `sulguk`. So that's how it looks now:
+To solve this we can convert HTML to telegram entities with `sulguk`. So that's how it looks now:
 
 ![](https://github.com/tishka17/sulguk/blob/master/images/problem_sulguk.png?raw=True)
 
