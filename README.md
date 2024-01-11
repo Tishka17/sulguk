@@ -131,6 +131,7 @@ The same behavior is supported in sulguk. Otherwise, you can set the language on
 #### Additional tags:
 * `<br/>` - new line
 * `<hr/>` - horizontal line
+* `<wbr/>` - word break opportunity
 * `<ul>` - unordered list
 * `<ol>` - ordered list with optional attributes
     * `reversed` - to reverse numbers order
