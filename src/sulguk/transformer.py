@@ -25,6 +25,7 @@ from .entities import (
     Text,
     Underline,
     Uppercase,
+    ZeroWidthSpace,
 )
 
 Attrs = List[Tuple[str, Optional[str]]]
@@ -39,7 +40,7 @@ OL_FORMAT = {
 
 LANG_CLASS_PREFIX = "language-"
 
-NO_CLOSING_TAGS = ("br", "hr", "meta", "link", "img")
+NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img")
 
 
 class Transformer(HTMLParser):
@@ -196,6 +197,8 @@ class Transformer(HTMLParser):
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
+        elif tag == "wbr":
+            entity = ZeroWidthSpace()
         elif tag == "hr":
             entity = HorizontalLine()
         elif tag in ("img",):

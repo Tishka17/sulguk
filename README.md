@@ -40,7 +40,7 @@ But this is how it is rendered in Telegram with `parse_mode="html"`:
 
 ![](https://github.com/tishka17/sulguk/blob/master/images/problem_telegram.png?raw=True)
 
-T osolve this we can convert HTML to telegram entites with `sulguk`. So that's how it looks now:
+To solve this we can convert HTML to telegram entities with `sulguk`. So that's how it looks now:
 
 ![](https://github.com/tishka17/sulguk/blob/master/images/problem_sulguk.png?raw=True)
 
@@ -131,6 +131,7 @@ The same behavior is supported in sulguk. Otherwise, you can set the language on
 #### Additional tags:
 * `<br/>` - new line
 * `<hr/>` - horizontal line
+* `<wbr/>` - word break opportunity
 * `<ul>` - unordered list
 * `<ol>` - ordered list with optional attributes
     * `reversed` - to reverse numbers order
