@@ -115,4 +115,6 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         parse_mode = getattr(method, "parse_mode", "")
         if parse_mode is UNSET_PARSE_MODE:
             parse_mode = bot.parse_mode
+        if isinstance(parse_mode, type(UNSET_PARSE_MODE)):
+            parse_mode = bot.default.parse_mode
         return parse_mode == SULGUK_PARSE_MODE
