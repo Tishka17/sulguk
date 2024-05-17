@@ -2,6 +2,7 @@ import logging
 from typing import Any, Callable, Dict, Type, TypeVar
 
 from aiogram import Bot
+from aiogram.client.default import Default
 from aiogram.client.session.middlewares.base import (
     BaseRequestMiddleware,
     NextRequestMiddlewareType,
@@ -16,7 +17,6 @@ from aiogram.methods import (
 )
 from aiogram.methods.base import TelegramType
 from aiogram.types import (
-    UNSET_PARSE_MODE,
     InlineQueryResult,
     InlineQueryResultArticle,
 )
@@ -113,6 +113,6 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
 
     def _is_parse_mode_supported(self, method: Any, bot: Bot) -> bool:
         parse_mode = getattr(method, "parse_mode", "")
-        if parse_mode is UNSET_PARSE_MODE:
-            parse_mode = bot.parse_mode
+        if isinstance(parse_mode, Default):
+            parse_mode = bot.default.parse_mode
         return parse_mode == SULGUK_PARSE_MODE
