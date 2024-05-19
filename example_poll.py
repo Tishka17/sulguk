@@ -24,10 +24,12 @@ async def main():
             "No",
             "Probably...",
         ],
-        explanation="You like.",
+        explanation="<b>You</b> <i>like it</i>.",
         correct_option_id=0,
         type="quiz",
     )
+
+    await bot.session.close()
 
 
 if __name__ == "__main__":
