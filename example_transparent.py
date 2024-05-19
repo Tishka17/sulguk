@@ -3,7 +3,7 @@ import os
 
 from aiogram import Bot
 
-from sulguk import AiogramSulgukMiddleware, SULGUK_PARSE_MODE
+from sulguk import SULGUK_PARSE_MODE, AiogramSulgukMiddleware
 
 CHAT_ID = 1
 
