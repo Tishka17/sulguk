@@ -13,6 +13,7 @@ from aiogram.methods import (
     EditMessageMedia,
     Response,
     SendMediaGroup,
+    SendPoll,
     TelegramMethod,
 )
 from aiogram.methods.base import TelegramType
@@ -37,6 +38,7 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             SendMediaGroup: self._process_send_media_group,
             AnswerWebAppQuery: self._process_answer_web_app_query,
             AnswerInlineQuery: self._process_answer_inline_query,
+            SendPoll: self._process_send_poll,
         }
 
     async def __call__(
@@ -80,6 +82,9 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         for media in method.media:
             self._transform_text_caption(media, bot)
 
+    def _process_send_poll(self, method: SendPoll, bot: Bot):
+        self._transform_poll(method, bot)
+
     def _process_generic(
             self, method: Any, bot: Bot,
     ) -> None:
@@ -111,8 +116,25 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
 
         method.parse_mode = None
 
-    def _is_parse_mode_supported(self, method: Any, bot: Bot) -> bool:
-        parse_mode = getattr(method, "parse_mode", "")
+    def _transform_poll(self, method: SendPoll, bot: Bot):
+        if not self._is_parse_mode_supported(
+                method, bot, "explanation_parse_mode"):
+            return
+
+        explanation_result = transform_html(method.explanation)
+        method.explanation = explanation_result.text
+        method.explanation_entities = explanation_result.entities
+        method.explanation_parse_mode = None
+
+        question_result = transform_html(method.question)
+        method.question = question_result.text
+        method.question_entities = question_result.entities
+        method.question_parse_mode = None
+
+    def _is_parse_mode_supported(
+        self, method: Any, bot: Bot, parse_mode_attr: str = "parse_mode",
+    ) -> bool:
+        parse_mode = getattr(method, parse_mode_attr, "")
         if isinstance(parse_mode, Default):
             parse_mode = bot.default.parse_mode
         return parse_mode == SULGUK_PARSE_MODE
