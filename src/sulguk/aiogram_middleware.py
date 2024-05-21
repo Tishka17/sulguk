@@ -126,6 +126,10 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
         method.explanation_entities = explanation_result.entities
         method.explanation_parse_mode = None
 
+        if not self._is_parse_mode_supported(
+                method, bot, "question_parse_mode"):
+            return
+
         question_result = transform_html(method.question)
         method.question = question_result.text
         method.question_entities = question_result.entities
