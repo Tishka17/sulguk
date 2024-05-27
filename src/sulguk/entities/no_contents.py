@@ -19,3 +19,8 @@ class HorizontalLine(NoContents):
         state.canvas.add_new_line_soft()
         state.canvas.add_text("⎯" * 10)
         state.canvas.add_new_line_soft()
+
+
+class ZeroWidthSpace(NoContents):
+    def render(self, state: State) -> None:
+        state.canvas.add_text("\u200b")
