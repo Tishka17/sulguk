@@ -2,6 +2,7 @@ import logging
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import LinkPreviewOptions
 
 from .chat_info import get_chat
 from .file import load_file
@@ -28,6 +29,9 @@ async def edit(bot: Bot, args: EditArgs):
             message_id=message_id,
             text=data.text,
             entities=data.entities,
+            link_preview_options=LinkPreviewOptions(
+                is_disabled=True,
+            ),
         )
     except TelegramBadRequest as e:
         if "message is not modified" in e.message:

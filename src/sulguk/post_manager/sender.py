@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Chat, Message
+from aiogram.types import Chat, Message, LinkPreviewOptions
 
 from .chat_info import get_chat
 from .exceptions import LinkedMessageNotFoundError
@@ -71,7 +71,9 @@ async def send(bot: Bot, args: SendArgs):
         chat_id=chat.id,
         text=data.text,
         entities=data.entities,
-        disable_web_page_preview=True,
+        link_preview_options=LinkPreviewOptions(
+            is_disabled=True,
+        ),
     )
     message_link = make_link(chat, message)
     logger.info("Message sent: %s", unparse_link(message_link))
@@ -88,7 +90,9 @@ async def send(bot: Bot, args: SendArgs):
             reply_to_message_id=linked_message.message_id,
             text=data.text,
             entities=data.entities,
-            disable_web_page_preview=True,
+            link_preview_options=LinkPreviewOptions(
+                is_disabled=True,
+            ),
         )
         comment_link = make_link(chat, message, comment)
         logger.info("Comment sent: %s", unparse_link(comment_link))
