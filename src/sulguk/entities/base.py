@@ -17,6 +17,18 @@ class Entity(ABC):
 
 
 @dataclass
+class Invisible(Entity):
+    entities: List[Entity] = field(default_factory=list)
+    block: bool = False
+
+    def add(self, entity: Entity):
+        self.entities.append(entity)
+
+    def render(self, state: State) -> None:
+        pass
+
+
+@dataclass
 class Group(Entity):
     entities: List[Entity] = field(default_factory=list)
     block: bool = False
