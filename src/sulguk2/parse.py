@@ -1,9 +1,3 @@
-"""
-TODO:
-* skip all except body
-* process styles from file
-"""
-
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Iterable, Optional, Tuple
@@ -410,6 +404,9 @@ class Transformer:
             css_matcher: cssselect2.Matcher,
     ):
         selectors = css_matcher.match(token)
+        style = token.etree_element.attrib.get("style")
+        if style:
+            selectors.append([parse_style_declaration(style)])  # TODO more data
         self.handle_tag_open(
             token.etree_element,
             selectors,
@@ -425,32 +422,59 @@ treebuilder = html5lib.getTreeBuilder('etree')
 parser = html5lib.HTMLParser(tree=treebuilder)
 
 
-def rules_to_matcher(rules: list[Node]):
-    matcher = cssselect2.Matcher()
+def parse_style_declaration(content: str | list[Node]):
+    declarations = tinycss2.parse_declaration_list(content, skip_whitespace=True, skip_comments=True)
+    return [
+        Declaration(
+            name=d.lower_name,
+            important=d.important,
+            value=[v for v in d.value if not isinstance(v, tinycss2.ast.WhitespaceToken)],
+        )
+        for d in declarations
+    ]
+
+
+def add_rules(matcher: cssselect2.Matcher, rules: list[Node]) -> None:
     for rule in rules:
         if not isinstance(rule, QualifiedRule):
             continue
         selectors = cssselect2.compile_selector_list(rule.prelude)
+        payload = parse_style_declaration(rule.content)
         for selector in selectors:
-            declarations = tinycss2.parse_declaration_list(rule.content, skip_whitespace=True, skip_comments=True)
-            payload = [
-                Declaration(
-                    name=d.lower_name,
-                    important=d.important,
-                    value=[v for v in d.value if not isinstance(v, tinycss2.ast.WhitespaceToken)],
-                )
-                for d in declarations
-            ]
             matcher.add_selector(selector, payload)
-    return matcher
+
+
+def print_tree(entity: Entity, indent: str = ""):
+    print(indent, type(entity).__name__)
+    if hasattr(entity, "entities"):
+        for item in entity.entities:
+            print_tree(item, indent + "  ")
+    if isinstance(entity, Wrapper):
+        print_tree(entity.head, indent + "  ")
+
+
+def process_html_styles(matcher: cssselect2.Matcher, token: ElementWrapper):
+    for token in token.iter_subtree():
+        if token.etree_element.tag == xhtml_tag("style"):
+            rules = tinycss2.parse_stylesheet(token.etree_element.text, skip_whitespace=True, skip_comments=True)
+            add_rules(matcher, rules)
+
+
+def process_external_styles(matcher: cssselect2.Matcher, css: str):
+    rules = tinycss2.parse_stylesheet(css, skip_whitespace=True, skip_comments=True)
+    add_rules(matcher, rules)
 
 
 def parse_html(css, html):
-    rules = tinycss2.parse_stylesheet(css, skip_whitespace=True, skip_comments=True)
-    wrapper = cssselect2.ElementWrapper.from_html_root(parser.parse(html))
+    matcher = cssselect2.Matcher()
+    process_external_styles(matcher, css)
+    root = parser.parse(html)
+    wrapper = cssselect2.ElementWrapper.from_html_root(root)
+    process_html_styles(matcher, wrapper)
     transformer = Transformer()
-    transformer.walk(wrapper, rules_to_matcher(rules))
+    transformer.walk(wrapper, matcher)
 
+    print_tree(transformer.root)
     state = State()
     transformer.root.render(state)
     return RenderResult(
