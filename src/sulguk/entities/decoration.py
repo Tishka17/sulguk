@@ -68,6 +68,24 @@ class Uppercase(Group):
 
 
 @dataclass
+class Lowercase(Group):
+    def render(self, state: State) -> None:
+        transform = state.canvas.text_transformation
+        state.canvas.text_transformation = lambda s: s.lower()
+        super().render(state)
+        state.canvas.text_transformation = transform
+
+
+@dataclass
+class Capitalize(Group):
+    def render(self, state: State) -> None:
+        transform = state.canvas.text_transformation
+        state.canvas.text_transformation = lambda s: s.capitalize()
+        super().render(state)
+        state.canvas.text_transformation = transform
+
+
+@dataclass
 class Quote(Group):
     def render(self, state: State) -> None:
         state.canvas.add_text("“")

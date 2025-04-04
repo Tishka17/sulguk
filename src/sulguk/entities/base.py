@@ -28,6 +28,19 @@ class Invisible(Entity):
         pass
 
 
+
+@dataclass
+class Spacer(Entity):
+    entities: List[Entity] = field(default_factory=list)
+    block: bool = False
+
+    def add(self, entity: Entity):
+        raise NotImplementedError()
+
+    def render(self, state: State) -> None:
+        state.canvas.add_new_line()
+
+
 @dataclass
 class Group(Entity):
     entities: List[Entity] = field(default_factory=list)

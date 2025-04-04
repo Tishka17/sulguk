@@ -13,6 +13,7 @@ class ListGroup(Entity):
     reversed: bool = False
     format: NumberFormat = NumberFormat.DECIMAL
     start: int = 1
+    symbol: str = "•"
 
     def add(self, entity: Entity):
         self.entities.append(entity)
@@ -36,7 +37,7 @@ class ListGroup(Entity):
                     index_value = int_to_number(index, self.format)
                     mark = f"{index_value}. "
                 else:
-                    mark = "• "
+                    mark = self.symbol + " "
                 state.canvas.add_text(mark)
             entity.render(state)
             state.canvas.add_new_line_soft()
