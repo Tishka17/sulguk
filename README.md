@@ -143,6 +143,7 @@ The same behavior is supported in sulguk. Otherwise, you can set the language on
 * `<p>` - a paragraph, emphasized with empty lines
 * `<q>` - a quoted text
 * `<blockquote>` - a block quote. Like a paragraph with indentation
+* `<blockquote expandable>` - a block quote with expandable
 * `<h1>`-`<h6>` - text headers, styled using available telegram options
 * `<noscirpt>` - contents is shown as not scripting is supported
 * `<cite>`, `<var>` - italic
