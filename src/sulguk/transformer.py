@@ -195,13 +195,6 @@ class Transformer(HTMLParser):
         else:
             return Group()
         
-    """def _get_blockquote(self, attrs: Attrs) -> Entity:
-        emoji_id = self._find_attr("emoji-id", attrs)
-        if emoji_id:
-            return Emoji(custom_emoji_id=emoji_id)
-        else:
-            return Group()"""
-
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
             entity = NewLine()
