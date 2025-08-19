@@ -84,6 +84,14 @@ class Blockquote(DecoratedEntity):
 
 
 @dataclass
+class ExpandableBlockquote(DecoratedEntity):
+    def _get_entity(self, offset: int, length: int) -> MessageEntity:
+        return MessageEntity(
+            type="expandable_blockquote", offset=offset, length=length,
+        )
+
+
+@dataclass
 class Paragraph(Group):
     block: bool = True
 

@@ -13,6 +13,7 @@ __all__ = [
     "Emoji",
     "Quote",
     "Blockquote",
+    "ExpandableBlockquote",
     "Paragraph",
     "Pre",
     "ListGroup",
@@ -27,6 +28,7 @@ __all__ = [
 
 from .base import DecoratedEntity, Entity, Group
 from .decoration import (
+    ExpandableBlockquote,
     Blockquote,
     Bold,
     Code,

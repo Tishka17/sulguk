@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Tuple
 
 from sulguk.render.numbers import NumberFormat
 from .entities import (
+    ExpandableBlockquote,
     Blockquote,
     Bold,
     Code,
@@ -193,6 +194,13 @@ class Transformer(HTMLParser):
             return Emoji(custom_emoji_id=emoji_id)
         else:
             return Group()
+        
+    """def _get_blockquote(self, attrs: Attrs) -> Entity:
+        emoji_id = self._find_attr("emoji-id", attrs)
+        if emoji_id:
+            return Emoji(custom_emoji_id=emoji_id)
+        else:
+            return Group()"""
 
     def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
         if tag == "br":
@@ -261,8 +269,11 @@ class Transformer(HTMLParser):
             nested = entity = Quote()
         elif tag in ("pre",):
             nested = entity = self._get_pre(attrs)
-        elif tag in ("blockquote",):
-            nested = entity = Blockquote()
+        elif tag in ("blockquote", ):
+            if "expandable" in attrs[0]:
+                nested = entity = ExpandableBlockquote()
+            else:
+                nested = entity = Blockquote()
         elif tag in ("progress",):
             nested = entity = self._get_progress(attrs)
         elif tag in ("meter",):
