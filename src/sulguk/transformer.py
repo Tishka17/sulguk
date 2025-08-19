@@ -263,7 +263,7 @@ class Transformer(HTMLParser):
         elif tag in ("pre",):
             nested = entity = self._get_pre(attrs)
         elif tag in ("blockquote", ):
-            if "expandable" in attrs[0]:
+            if attrs and "expandable" in attrs[0]:
                 nested = entity = ExpandableBlockquote()
             else:
                 nested = entity = Blockquote()
