@@ -143,7 +143,7 @@ class Transformer(HTMLParser):
         return Pre(language=self._get_language_class(attrs))
 
     def _get_blockquote(self, attrs: Attrs) -> Entity:
-        expandable = self._find_attr("expandable", attrs)
+        expandable = self._find_attr("expandable", attrs, None)
         if expandable is None:
             expandable = False
         return Blockquote(expandable=expandable)
