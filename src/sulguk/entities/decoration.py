@@ -81,7 +81,10 @@ class Blockquote(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="blockquote", offset=offset, length=length, expandable=self.expandable,
+            type="blockquote",
+            offset=offset,
+            length=length,
+            expandable=self.expandable,
         )
 
 
