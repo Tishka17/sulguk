@@ -144,7 +144,7 @@ class Transformer(HTMLParser):
 
     def _get_blockquote(self, attrs: Attrs) -> Entity:
         return Blockquote(
-            expandable=self._find_attr("expandable", attrs, "") is None
+            expandable=self._find_attr("expandable", attrs, "") is None,
         )
 
     def _get_mark(self, attrs: Attrs):
