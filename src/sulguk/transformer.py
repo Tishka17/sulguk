@@ -1,3 +1,4 @@
+import urllib.parse
 from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
@@ -44,10 +45,18 @@ NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img")
 
 
 class Transformer(HTMLParser):
-    def __init__(self):
+    def __init__(self, base_url: str | None = None) -> None:
         super().__init__()
         self.root = Group()
         self.entities: List[Entity] = [self.root]
+        self.base_url = base_url
+
+    def fix_url(self, url: str | None) -> str | None:
+        if url is None:
+            return None
+        if self.base_url is None:
+            return url
+        return urllib.parse.urljoin(self.base_url, url)
 
     @property
     def current(self) -> Entity:
@@ -70,7 +79,7 @@ class Transformer(HTMLParser):
     def _get_a(self, attrs: Attrs) -> Entity:
         url = self._find_attr("href", attrs)
         if url:
-            return Link(url=url)
+            return Link(url=self.fix_url(url))
         return Group()
 
     def _get_img(self, attrs: Attrs) -> Optional[Entity]:
@@ -82,7 +91,7 @@ class Transformer(HTMLParser):
         text_entity = Text(text="🖼️" + text)
         if not url:
             return text_entity
-        link = Link(url=url)
+        link = Link(url=self.fix_url(url))
         link.add(text_entity)
         return link
 
@@ -141,6 +150,11 @@ class Transformer(HTMLParser):
 
     def _get_pre(self, attrs: Attrs) -> Entity:
         return Pre(language=self._get_language_class(attrs))
+
+    def _get_blockquote(self, attrs: Attrs) -> Entity:
+        return Blockquote(
+            expandable=self._find_attr("expandable", attrs, "") is None,
+        )
 
     def _get_mark(self, attrs: Attrs):
         inner = Group()
@@ -253,7 +267,7 @@ class Transformer(HTMLParser):
             nested = entity = Spoiler()
         elif tag in ("tg-emoji",):
             nested = entity = self._get_tg_emoji(attrs)
-        elif tag in ("p",):
+        elif tag in ("p", "summary"):
             nested = entity = Paragraph()
         elif tag in ("u", "ins"):
             nested = entity = Underline()
@@ -262,7 +276,9 @@ class Transformer(HTMLParser):
         elif tag in ("pre",):
             nested = entity = self._get_pre(attrs)
         elif tag in ("blockquote",):
-            nested = entity = Blockquote()
+            nested = entity = self._get_blockquote(attrs)
+        elif tag in ("details",):
+            nested = entity = Blockquote(expandable=True)
         elif tag in ("progress",):
             nested = entity = self._get_progress(attrs)
         elif tag in ("meter",):

@@ -32,3 +32,12 @@ def test_empty_image():
     result = transform_html(html)
     assert result.text == "01"
     assert not result.entities
+
+
+def test_base_url():
+    html = '<img src="data"><img src="/data"><img src="https://example.com">'
+    result = transform_html(html, base_url="http://example.com/root/")
+    assert len(result.entities) == 3
+    assert result.entities[0]['url'] == "http://example.com/root/data"
+    assert result.entities[1]['url'] == "http://example.com/data"
+    assert result.entities[2]['url'] == "https://example.com"

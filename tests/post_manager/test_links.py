@@ -16,7 +16,7 @@ from sulguk.post_manager.links import Link, parse_link
                 "https://t.me/mock_channel_17/52",
                 Link("@mock_channel_17", 52, None),
         ),
-    ]
+    ],
 )
 def test_links(src, result):
     assert result == parse_link(src)

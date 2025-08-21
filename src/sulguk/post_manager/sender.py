@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Chat, Message
+from aiogram.types import Chat, LinkPreviewOptions, Message
 
 from .chat_info import get_chat
 from .exceptions import LinkedMessageNotFoundError
@@ -66,12 +66,14 @@ get_linked_message = {
 
 async def send(bot: Bot, args: SendArgs):
     chat = await get_chat(bot, args.destination.group_id)
-    data = load_file(args.file[0])
+    data = load_file(args.file[0], args.base_url)
     message = await bot.send_message(
         chat_id=chat.id,
         text=data.text,
         entities=data.entities,
-        disable_web_page_preview=True,
+        link_preview_options=LinkPreviewOptions(
+            is_disabled=True,
+        ),
     )
     message_link = make_link(chat, message)
     logger.info("Message sent: %s", unparse_link(message_link))
@@ -82,13 +84,15 @@ async def send(bot: Bot, args: SendArgs):
         logger.error("Cannot load linked message to leave a comment")
         raise LinkedMessageNotFoundError("No linked message found")
     for file in args.file[1:]:
-        data = load_file(file)
+        data = load_file(file, args.base_url)
         comment = await bot.send_message(
             chat_id=chat.linked_chat_id,
             reply_to_message_id=linked_message.message_id,
             text=data.text,
             entities=data.entities,
-            disable_web_page_preview=True,
+            link_preview_options=LinkPreviewOptions(
+                is_disabled=True,
+            ),
         )
         comment_link = make_link(chat, message, comment)
         logger.info("Comment sent: %s", unparse_link(comment_link))

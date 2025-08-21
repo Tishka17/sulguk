@@ -11,12 +11,15 @@ class RenderResult:
     entities: List[MessageEntity]
 
 
-def transform_html(raw_html: Optional[str]) -> RenderResult:
+def transform_html(
+        raw_html: Optional[str],
+        base_url: str|None = None,
+) -> RenderResult:
 
     if raw_html is None or raw_html.strip() == "":
         return RenderResult(text="", entities=[])
 
-    transformer = Transformer()
+    transformer = Transformer(base_url=base_url)
     transformer.feed(raw_html)
     state = State()
     transformer.root.render(state)
