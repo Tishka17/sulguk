@@ -22,7 +22,7 @@ async def edit(bot: Bot, args: EditArgs):
         chat_id = chat.id
         message_id = args.destination.post_id
 
-    data = load_file(args.file)
+    data = load_file(args.file, args.base_url)
     try:
         await bot.edit_message_text(
             chat_id=chat_id,
