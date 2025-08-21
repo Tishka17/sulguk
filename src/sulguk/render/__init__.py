@@ -1,8 +1,8 @@
 __all__ = [
     "Canvas",
-    "TextMode",
-    "State",
     "MessageEntity",
+    "State",
+    "TextMode",
     "int_to_number",
 ]
 
