@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Chat, Message, LinkPreviewOptions
+from aiogram.types import Chat, LinkPreviewOptions, Message
 
 from .chat_info import get_chat
 from .exceptions import LinkedMessageNotFoundError
