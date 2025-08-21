@@ -1,3 +1,4 @@
+import urllib.parse
 from html.parser import HTMLParser
 from typing import Any, List, Optional, Tuple
 
@@ -44,10 +45,18 @@ NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img")
 
 
 class Transformer(HTMLParser):
-    def __init__(self):
+    def __init__(self, base_url: str | None = None) -> None:
         super().__init__()
         self.root = Group()
         self.entities: List[Entity] = [self.root]
+        self.base_url = base_url
+
+    def fix_url(self, url: str | None) -> str | None:
+        if url is None:
+            return None
+        if self.base_url is None:
+            return url
+        return urllib.parse.urljoin(self.base_url, url)
 
     @property
     def current(self) -> Entity:
@@ -70,7 +79,7 @@ class Transformer(HTMLParser):
     def _get_a(self, attrs: Attrs) -> Entity:
         url = self._find_attr("href", attrs)
         if url:
-            return Link(url=url)
+            return Link(url=self.fix_url(url))
         return Group()
 
     def _get_img(self, attrs: Attrs) -> Optional[Entity]:
@@ -82,7 +91,7 @@ class Transformer(HTMLParser):
         text_entity = Text(text="🖼️" + text)
         if not url:
             return text_entity
-        link = Link(url=url)
+        link = Link(url=self.fix_url(url))
         link.add(text_entity)
         return link
 

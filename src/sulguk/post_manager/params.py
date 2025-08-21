@@ -9,12 +9,14 @@ class SendArgs:
     mode: Literal["poll", "getChat"]
     destination: Link
     file: List[str]
+    base_url: str | None
 
 
 class EditArgs:
     command: Literal["edit"]
     destination: Link
     file: str
+    base_url: str | None
 
 
 def init_parser():
@@ -31,7 +33,13 @@ def init_parser():
         "-m", "--mode", choices=["poll", "getChat"],
         default="poll",
     )
+    sender.add_argument(
+        "--base-url", default=None,
+    )
     editor = subparsers.add_parser("edit")
+    editor.add_argument(
+        "--base-url", default=None,
+    )
     editor.add_argument(
         "destination", type=parse_link,
     )

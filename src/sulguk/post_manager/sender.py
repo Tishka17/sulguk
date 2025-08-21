@@ -66,7 +66,7 @@ get_linked_message = {
 
 async def send(bot: Bot, args: SendArgs):
     chat = await get_chat(bot, args.destination.group_id)
-    data = load_file(args.file[0])
+    data = load_file(args.file[0], args.base_url)
     message = await bot.send_message(
         chat_id=chat.id,
         text=data.text,
@@ -84,7 +84,7 @@ async def send(bot: Bot, args: SendArgs):
         logger.error("Cannot load linked message to leave a comment")
         raise LinkedMessageNotFoundError("No linked message found")
     for file in args.file[1:]:
-        data = load_file(file)
+        data = load_file(file, args.base_url)
         comment = await bot.send_message(
             chat_id=chat.linked_chat_id,
             reply_to_message_id=linked_message.message_id,

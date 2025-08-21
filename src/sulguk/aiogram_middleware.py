@@ -32,7 +32,7 @@ Handler = Callable[[M, Bot], None]
 
 
 class AiogramSulgukMiddleware(BaseRequestMiddleware):
-    def __init__(self):
+    def __init__(self, base_url: str | None = None) -> None:
         self.handlers: Dict[Type[TelegramMethod], Handler] = {
             EditMessageMedia: self._process_edit_message_media,
             SendMediaGroup: self._process_send_media_group,
@@ -40,6 +40,7 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             AnswerInlineQuery: self._process_answer_inline_query,
             SendPoll: self._process_send_poll,
         }
+        self._base_url = base_url
 
     async def __call__(
             self,
@@ -97,15 +98,18 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             return
 
         if hasattr(method, "caption"):
-            result = transform_html(method.caption)
+            result = transform_html(method.caption, base_url=self._base_url)
             method.caption = result.text
             method.caption_entities = result.entities
         elif hasattr(method, "text"):
-            result = transform_html(method.text)
+            result = transform_html(method.text, base_url=self._base_url)
             method.text = result.text
             method.entities = result.entities
         elif hasattr(method, "message_text"):
-            result = transform_html(method.message_text)
+            result = transform_html(
+                method.message_text,
+                base_url=self._base_url,
+            )
             method.message_text = result.text
             method.entities = result.entities
         else:
@@ -121,7 +125,10 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
                 method, bot, "explanation_parse_mode"):
             return
 
-        explanation_result = transform_html(method.explanation)
+        explanation_result = transform_html(
+            method.explanation,
+            base_url=self._base_url,
+        )
         method.explanation = explanation_result.text
         method.explanation_entities = explanation_result.entities
         method.explanation_parse_mode = None
@@ -130,7 +137,10 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
                 method, bot, "question_parse_mode"):
             return
 
-        question_result = transform_html(method.question)
+        question_result = transform_html(
+            method.question,
+            base_url=self._base_url,
+        )
         method.question = question_result.text
         method.question_entities = question_result.entities
         method.question_parse_mode = None
