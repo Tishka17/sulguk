@@ -258,7 +258,7 @@ class Transformer(HTMLParser):
             nested = entity = Spoiler()
         elif tag in ("tg-emoji",):
             nested = entity = self._get_tg_emoji(attrs)
-        elif tag in ("p",):
+        elif tag in ("p", "summary"):
             nested = entity = Paragraph()
         elif tag in ("u", "ins"):
             nested = entity = Underline()
@@ -268,6 +268,8 @@ class Transformer(HTMLParser):
             nested = entity = self._get_pre(attrs)
         elif tag in ("blockquote",):
             nested = entity = self._get_blockquote(attrs)
+        elif tag in ("details",):
+            nested = entity = Blockquote(expandable=True)
         elif tag in ("progress",):
             nested = entity = self._get_progress(attrs)
         elif tag in ("meter",):
