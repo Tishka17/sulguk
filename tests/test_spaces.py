@@ -60,6 +60,6 @@ PRE_P_PLAIN = "1\n\n    2\n\n"
 ])
 def test_spaces(html, plain, name):
     result = transform_html(html)
-    print(repr(plain))
-    print(repr(html))
-    assert result.text == plain
+    assert result.text == plain, (
+        f"Expected text {plain!r}, but got {result.text!r}"
+    )

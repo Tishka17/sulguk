@@ -24,3 +24,4 @@ class MessageEntity(TypedDict, total=False):
     user: Optional[User]
     language: Optional[str]
     custom_emoji_id: Optional[str]
+    expandable: Optional[bool]
