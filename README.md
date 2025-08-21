@@ -124,6 +124,8 @@ Unsupported tags are raising an error.
 * `<tg-spoiler>` - a telegram spoiler
 * `<pre>` with optional `class="language-<name>"` - a preformatted block with code. `<name>` will be sent as a language attribute in telegram.
 * `<code>` - an inline preformatted element. 
+* `<details>` - rendered as an expandable blockquote
+* `<summary>` - treated as a paragraph, typically used as first child of `<details>` for the heading
 
 **Note:** In standard Telegram HTML you can set a preformatted text language nesting `<code class="language-<name>">` in `<pre>` tag. This works when it is an only child. But any additional symbol outside of `<code>` breaks it.
 The same behavior is supported in sulguk. Otherwise, you can set the language on `<pre>` tag itself.
