@@ -1,6 +1,7 @@
 line-length = 79
 src = ["src"]
 
+[lint]
 select = [
     "E",
     "F",
@@ -21,8 +22,8 @@ ignore = [
     "RUF001",
 ]
 
-[isort]
+[lint.isort]
 no-lines-before = ["local-folder"]
 
-[flake8-tidy-imports]
+[lint.flake8-tidy-imports]
 ban-relative-imports = "parents"

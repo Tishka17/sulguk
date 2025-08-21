@@ -142,6 +142,11 @@ class Transformer(HTMLParser):
     def _get_pre(self, attrs: Attrs) -> Entity:
         return Pre(language=self._get_language_class(attrs))
 
+    def _get_blockquote(self, attrs: Attrs) -> Entity:
+        return Blockquote(
+            expandable=self._find_attr("expandable", attrs, "") is None,
+        )
+
     def _get_mark(self, attrs: Attrs):
         inner = Group()
         entity = Group()
@@ -262,7 +267,7 @@ class Transformer(HTMLParser):
         elif tag in ("pre",):
             nested = entity = self._get_pre(attrs)
         elif tag in ("blockquote",):
-            nested = entity = Blockquote()
+            nested = entity = self._get_blockquote(attrs)
         elif tag in ("progress",):
             nested = entity = self._get_progress(attrs)
         elif tag in ("meter",):
