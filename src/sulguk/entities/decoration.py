@@ -12,10 +12,7 @@ class Link(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="text_link",
-            url=self.url,
-            offset=offset,
-            length=length,
+            type="text_link", url=self.url, offset=offset, length=length,
         )
 
 
@@ -41,9 +38,7 @@ class Underline(DecoratedEntity):
 class Strikethrough(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="strikethrough",
-            offset=offset,
-            length=length,
+            type="strikethrough", offset=offset, length=length,
         )
 
 
@@ -59,9 +54,7 @@ class Code(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="code",
-            offset=offset,
-            length=length,
+            type="code", offset=offset, length=length,
         )
 
 
@@ -91,11 +84,7 @@ class Blockquote(DecoratedEntity):
             type_entity = "expandable_blockquote"
         else:
             type_entity = "blockquote"
-        return MessageEntity(
-            type=type_entity,
-            offset=offset,
-            length=length,
-        )
+        return MessageEntity(type=type_entity, offset=offset, length=length)
 
 
 @dataclass
