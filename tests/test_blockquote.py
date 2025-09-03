@@ -6,12 +6,12 @@ from sulguk.data import MessageEntity
 BLOCKQUOTE_HTML = "1<blockquote>2</blockquote>3"
 BLOCKQUOTE_PLAIN = "123"
 BLOCKQUOTE_ENTITIES = [
-    MessageEntity(type="blockquote", offset=1, length=1, expandable=False),
+    MessageEntity(type="blockquote", offset=1, length=1),
 ]
 BLOCKQUOTE_EXPANDABLE_HTML = "1<blockquote expandable>2</blockquote>3"
 BLOCKQUOTE_EXPANDABLE_PLAIN = "123"
 BLOCKQUOTE_EXPANDABLE_ENTITIES = [
-    MessageEntity(type="blockquote", offset=1, length=1, expandable=True),
+    MessageEntity(type="expandable_blockquote", offset=1, length=1),
 ]
 
 

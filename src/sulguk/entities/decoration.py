@@ -80,12 +80,11 @@ class Blockquote(DecoratedEntity):
     expandable: bool = False
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
-        return MessageEntity(
-            type="blockquote",
-            offset=offset,
-            length=length,
-            expandable=self.expandable,
-        )
+        if self.expandable:
+            type_entity = "expandable_blockquote"
+        else:
+            type_entity = "blockquote"
+        return MessageEntity(type=type_entity, offset=offset, length=length)
 
 
 @dataclass
