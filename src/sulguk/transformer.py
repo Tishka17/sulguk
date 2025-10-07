@@ -41,7 +41,7 @@ OL_FORMAT = {
 
 LANG_CLASS_PREFIX = "language-"
 
-NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img")
+NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img", "input")
 
 
 class Transformer(HTMLParser):
@@ -94,6 +94,24 @@ class Transformer(HTMLParser):
         link = Link(url=self.fix_url(url))
         link.add(text_entity)
         return link
+
+    def _get_input(self, attrs: Attrs) -> Optional[Entity]:
+        type_ = self._find_attr("type", attrs)
+        if type_ == "checkbox":
+            checked = self._find_attr("checked", attrs)
+            if checked is None:
+                return Text(text="⬜️")
+            return Text(text="☑️")
+        if type_ == "radio":
+            checked = self._find_attr("checked", attrs)
+            if checked is None:
+                return Text(text="⚪️")
+            return Text(text="🔘")
+
+        value = self._find_attr("value", attrs)
+        if value:
+            return Underline(entities=[Text(text=value)])
+        return Text(text="________")
 
     def _get_ul(self, attrs: Attrs) -> Entity:
         return ListGroup(numbered=False)
@@ -217,6 +235,8 @@ class Transformer(HTMLParser):
             entity = HorizontalLine()
         elif tag in ("img",):
             entity = self._get_img(attrs)
+        elif tag in ("input",):
+            entity = self._get_input(attrs)
         elif tag in ("meta", "link"):
             return  # ignored tag
         else:
@@ -249,7 +269,7 @@ class Transformer(HTMLParser):
             nested = entity = self._get_a(attrs)
         elif tag in ("b", "strong"):
             nested = entity = Bold()
-        elif tag in ("i", "em", "cite", "var"):
+        elif tag in ("i", "em", "cite", "var", "tt"):
             nested = entity = Italic()
         elif tag in ("s", "strike", "del"):
             nested = entity = Strikethrough()

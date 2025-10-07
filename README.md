@@ -152,6 +152,8 @@ The same behavior is supported in sulguk. Otherwise, you can set the language on
 * `<progress>`, `<meter>` are rendered using emoji (🟩🟩🟩🟨⬜️⬜️)
 * `<kbd>`, `<samp>` - preformatted text
 * `<img>` - as a link with picture emoji before. `alt` text is used if provided.
+* `<tt>` - as italic text
+* `<input>` - as symbols ✅⬜️(checkbox), 🔘⚪️(radio) or `_______`/value in other cases
 
 #### Tags which are treated as block elements (like `<div>`):
 `<footer>`, `<header>`, `<main>`, `<nav>`, `<section>`
