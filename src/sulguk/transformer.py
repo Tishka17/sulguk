@@ -98,13 +98,13 @@ class Transformer(HTMLParser):
     def _get_input(self, attrs: Attrs) -> Optional[Entity]:
         type_ = self._find_attr("type", attrs)
         if type_ == "checkbox":
-            checked = self._find_attr("checked", attrs)
-            if checked is None:
+            checked = self._find_attr("checked", attrs, default=...)
+            if checked is ...:
                 return Text(text="⬜️")
             return Text(text="☑️")
         if type_ == "radio":
-            checked = self._find_attr("checked", attrs)
-            if checked is None:
+            checked = self._find_attr("checked", attrs, default=...)
+            if checked is ...:
                 return Text(text="⚪️")
             return Text(text="🔘")
 
