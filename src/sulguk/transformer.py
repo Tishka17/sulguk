@@ -100,7 +100,7 @@ class Transformer(HTMLParser):
         if type_ == "checkbox":
             checked = self._find_attr("checked", attrs, default=...)
             if checked is ...:
-                return Text(text="⬜️")
+                return Text(text="◻️")
             return Text(text="☑️")
         if type_ == "radio":
             checked = self._find_attr("checked", attrs, default=...)
