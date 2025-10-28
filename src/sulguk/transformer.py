@@ -48,6 +48,7 @@ class Transformer(HTMLParser):
     def __init__(self, base_url: str | None = None) -> None:
         super().__init__()
         self.root = Group()
+        self.tags: List[str] = []
         self.entities: List[Entity] = [self.root]
         self.base_url = base_url
 
@@ -61,6 +62,10 @@ class Transformer(HTMLParser):
     @property
     def current(self) -> Entity:
         return self.entities[-1]
+
+    @property
+    def current_tag(self) -> str:
+        return self.tags[-1]
 
     def handle_data(self, data: str) -> None:
         self.current.add(Text(data))
@@ -309,6 +314,7 @@ class Transformer(HTMLParser):
             nested, entity = self._get_mark(attrs)
         else:
             raise ValueError(f"Unsupported tag: {tag}")
+        self.tags.append(tag)
         self.current.add(entity)
         self.entities.append(nested)
 
@@ -316,4 +322,9 @@ class Transformer(HTMLParser):
         tag = tag.lower()
         if tag in NO_CLOSING_TAGS:
             raise ValueError(f"Invalid closing tag: {tag}")
+        if self.current_tag != tag:
+            raise ValueError(
+                f"Unmatched closing tag for <{self.current_tag}>: </{tag}>",
+            )
+        self.tags.pop()
         self.entities.pop()
