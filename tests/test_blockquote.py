@@ -1,6 +1,5 @@
 import pytest
 
-from sulguk import transform_html
 from sulguk.data import MessageEntity
 
 BLOCKQUOTE_HTML = "1<blockquote>2</blockquote>3"
@@ -27,7 +26,7 @@ BLOCKQUOTE_EXPANDABLE_ENTITIES = [
         ),
     ],
 )
-def test_blockquote(html, plain, entities, name):
+def test_blockquote(transform_html, html, plain, entities, name):
     result = transform_html(html)
     assert result.text == plain, (
         f"Expected text {plain!r}, but got {result.text!r}"

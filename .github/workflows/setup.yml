@@ -36,8 +36,8 @@ jobs:
 
     - name: Run ruff
       run: |
-        ruff check src/sulguk
-      
+        ruff check src/sulguk src/sulguk2
+
     - name: Run tests
       run: |
-        pytest
+        pytest --cov=src/sulguk --cov=src/sulguk2 --cov-report=term-missing
