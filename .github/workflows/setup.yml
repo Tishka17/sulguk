@@ -40,4 +40,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest --cov=src/sulguk --cov=src/sulguk2 --cov-report=term-missing
+        pytest --cov --cov-report=term-missing
