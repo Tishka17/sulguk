@@ -20,7 +20,9 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
-dependencies = []
+dependencies = [
+    "html5lib>=1.0,<2.0",
+]
 [project.optional-dependencies]
 cli = [
     "aiogram",
