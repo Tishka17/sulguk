@@ -5,13 +5,13 @@ from typing import List, Optional
 from html5lib.constants import namespaces
 from html5lib.treebuilders import base
 
-from sulguk.entities import (
+from .entities import (
     Entity,
     Group,
     Stub,
     Text,
 )
-from sulguk2.mapper import Attrs, Mapper
+from .mapper import Attrs, Mapper
 
 
 def get_sulguk_tree_builder(base_url: Optional[str] = None):

@@ -1,5 +1,7 @@
 import pytest
 
+from sulguk import transform_html
+
 SPACES_SPAN_HTML = """
 1    <span>2</span> <span>   3<span>    </span>    </span>
 """
@@ -56,7 +58,7 @@ PRE_P_PLAIN = "1\n\n    2\n\n"
     (PRE_HTML, PRE_PLAIN, "pre"),
     (PRE_P_HTML, PRE_P_PLAIN, "pre p"),
 ])
-def test_spaces(transform_html, html, plain, name):
+def test_spaces(html, plain, name):
     result = transform_html(html)
     assert result.text == plain, (
         f"Expected text {plain!r}, but got {result.text!r}"

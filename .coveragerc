@@ -1,4 +1,4 @@
 [run]
 branch = True
 relative_files = True
-source_pkgs = sulguk, sulguk2
+source_pkgs = sulguk

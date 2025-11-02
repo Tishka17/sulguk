@@ -2,7 +2,7 @@ import urllib.parse
 from functools import cached_property, partial
 from typing import Any, Callable, List, Optional, Tuple
 
-from sulguk.entities import (
+from .entities import (
     Blockquote,
     Bold,
     Code,
@@ -27,7 +27,7 @@ from sulguk.entities import (
     Uppercase,
     ZeroWidthSpace,
 )
-from sulguk.render.numbers import NumberFormat
+from .render.numbers import NumberFormat
 
 Attrs = List[Tuple[str, str]]  # html5lib returns empty string if no value
 
@@ -69,9 +69,6 @@ class Mapper:
     def _map(
         self,
     ) -> dict[str, Callable[[Attrs], Tuple[Entity, Entity] | Entity | None]]:
-        def _no_attrs(factory):
-            return lambda attrs: factory()
-
         _map = {
             # single tags
             "br": _no_attrs(NewLine),
@@ -96,9 +93,6 @@ class Mapper:
             "q": _no_attrs(Quote),
             "mark": self._get_mark,
         }
-
-        def _add_map_keys(map, keys, default):
-            map.update(dict.fromkeys(keys, default))
 
         update_map = partial(_add_map_keys, _map)
         group_f = _no_attrs(Group)
@@ -296,3 +290,11 @@ class Mapper:
             return Emoji(custom_emoji_id=emoji_id)
         else:
             return Group()
+
+
+def _no_attrs(factory):
+    return lambda attrs: factory()
+
+
+def _add_map_keys(map, keys, default):
+    map.update(dict.fromkeys(keys, default))
