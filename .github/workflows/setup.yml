@@ -37,7 +37,7 @@ jobs:
     - name: Run ruff
       run: |
         ruff check src/sulguk
-      
+
     - name: Run tests
       run: |
         pytest

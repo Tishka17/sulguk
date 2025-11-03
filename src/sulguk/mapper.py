@@ -1,8 +1,7 @@
 import urllib.parse
-from html.parser import HTMLParser
-from typing import Any, List, Optional, Tuple
+from functools import cached_property, partial
+from typing import Any, Callable, List, Optional, Tuple
 
-from sulguk.render.numbers import NumberFormat
 from .entities import (
     Blockquote,
     Bold,
@@ -28,8 +27,9 @@ from .entities import (
     Uppercase,
     ZeroWidthSpace,
 )
+from .render.numbers import NumberFormat
 
-Attrs = List[Tuple[str, Optional[str]]]
+Attrs = List[Tuple[str, str]]
 
 OL_FORMAT = {
     "1": NumberFormat.DECIMAL,
@@ -44,33 +44,98 @@ LANG_CLASS_PREFIX = "language-"
 NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img", "input")
 
 
-class Transformer(HTMLParser):
+class Mapper:
     def __init__(self, base_url: str | None = None) -> None:
-        super().__init__()
-        self.root = Group()
-        self.entities: List[Entity] = [self.root]
-        self.base_url = base_url
+        self._base_url = base_url
 
-    def fix_url(self, url: str | None) -> str | None:
+    def match(
+        self,
+        tag: str,
+        attrs: Attrs,
+    ) -> Tuple[Optional[Entity], Optional[Entity]]:
+        factory = self._map.get(tag)
+        if factory is None:
+            raise ValueError(f"Unsupported tag: {tag}")
+        result = factory(attrs)
+        if isinstance(result, tuple):
+            inner, entity = result
+        else:
+            inner = None
+            entity = result
+
+        return inner, entity
+
+    @cached_property
+    def _map(
+        self,
+    ) -> dict[str, Callable[[Attrs], Tuple[Entity, Entity] | Entity | None]]:
+        _map = {
+            # single tags
+            "br": _no_attrs(NewLine),
+            "wbr": _no_attrs(ZeroWidthSpace),
+            "hr": _no_attrs(HorizontalLine),
+            "img": self._get_img,
+            "input": self._get_input,
+            # paired tags
+            "ul": self._get_ul,
+            "ol": self._get_ol,
+            "li": self._get_li,
+            "a": self._get_a,
+            "code": self._get_code,
+            "span": self._get_span,
+            "tg-emoji": self._get_tg_emoji,
+            "tg-spoiler": _no_attrs(Spoiler),
+            "pre": self._get_pre,
+            "blockquote": self._get_blockquote,
+            "details": _no_attrs(partial(Blockquote, expandable=True)),
+            "progress": self._get_progress,
+            "meter": self._get_meter,
+            "q": _no_attrs(Quote),
+            "mark": self._get_mark,
+        }
+
+        update_map = partial(_add_map_keys, _map)
+        group_f = _no_attrs(Group)
+
+        # special
+        update_map(("meta", "link"), _no_attrs(lambda: None))
+        update_map(("html", "noscript", "body"), group_f)
+        update_map(
+            ("head", "script", "style", "template", "title"),
+            _no_attrs(Stub),
+        )
+        # normal
+        update_map(("b", "strong"), _no_attrs(Bold))
+        update_map(("i", "em", "cite", "var", "tt"), _no_attrs(Italic))
+        update_map(("s", "strike", "del"), _no_attrs(Strikethrough))
+        update_map(("kbd", "samp"), _no_attrs(Code))
+        update_map(
+            ("div", "footer", "header", "main", "nav", "section"),
+            _no_attrs(partial(Group, block=True)),
+        )
+        update_map(("output", "data", "time"), group_f)
+        update_map(("p", "summary"), _no_attrs(Paragraph))
+        update_map(("u", "ins"), _no_attrs(Underline))
+
+        # special cases - h1-h6 need tag parameter
+        for h_tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
+            _map[h_tag] = lambda attrs, tag=h_tag: self._get_h(tag, attrs)
+
+        return _map
+
+    def _fix_url(self, url: str | None) -> str | None:
         if url is None:
             return None
-        if self.base_url is None:
+        if self._base_url is None:
             return url
-        return urllib.parse.urljoin(self.base_url, url)
-
-    @property
-    def current(self) -> Entity:
-        return self.entities[-1]
-
-    def handle_data(self, data: str) -> None:
-        self.current.add(Text(data))
+        return urllib.parse.urljoin(self._base_url, url)
 
     def _find_attr(
-            self,
-            name: str,
-            attrs: Attrs,
-            default: Any = "",
-    ) -> Optional[str]:
+        self,
+        name: str,
+        attrs: Attrs,
+        default: Any = "",
+    ):
         return next((value for key, value in attrs if key == name), default)
 
     def _get_classes(self, attrs: Attrs):
@@ -79,7 +144,7 @@ class Transformer(HTMLParser):
     def _get_a(self, attrs: Attrs) -> Entity:
         url = self._find_attr("href", attrs)
         if url:
-            return Link(url=self.fix_url(url))
+            return Link(url=self._fix_url(url))
         return Group()
 
     def _get_img(self, attrs: Attrs) -> Optional[Entity]:
@@ -91,7 +156,7 @@ class Transformer(HTMLParser):
         text_entity = Text(text="🖼️" + text)
         if not url:
             return text_entity
-        link = Link(url=self.fix_url(url))
+        link = Link(url=self._fix_url(url))
         link.add(text_entity)
         return link
 
@@ -156,7 +221,7 @@ class Transformer(HTMLParser):
         classes = self._get_classes(attrs)
         return next(
             (
-                c[len(LANG_CLASS_PREFIX):]
+                c[len(LANG_CLASS_PREFIX) :]
                 for c in classes
                 if c.startswith(LANG_CLASS_PREFIX)
             ),
@@ -171,7 +236,7 @@ class Transformer(HTMLParser):
 
     def _get_blockquote(self, attrs: Attrs) -> Entity:
         return Blockquote(
-            expandable=self._find_attr("expandable", attrs, "") is None,
+            expandable=self._find_attr("expandable", attrs, None) == "",
         )
 
     def _get_mark(self, attrs: Attrs):
@@ -226,94 +291,10 @@ class Transformer(HTMLParser):
         else:
             return Group()
 
-    def handle_startendtag(self, tag: str, attrs: Attrs) -> None:
-        if tag == "br":
-            entity = NewLine()
-        elif tag == "wbr":
-            entity = ZeroWidthSpace()
-        elif tag == "hr":
-            entity = HorizontalLine()
-        elif tag in ("img",):
-            entity = self._get_img(attrs)
-        elif tag in ("input",):
-            entity = self._get_input(attrs)
-        elif tag in ("meta", "link"):
-            return  # ignored tag
-        else:
-            raise ValueError(f"Unsupported single tag: `{tag}`")
-        if entity:
-            self.current.add(entity)
 
-    def handle_starttag(
-            self,
-            tag: str,
-            attrs: Attrs,
-    ) -> None:
-        tag = tag.lower()
-        # single tags, no closing
-        if tag in NO_CLOSING_TAGS:
-            return self.handle_startendtag(tag, attrs)
-        # special
-        elif tag in ("html", "noscript", "body"):
-            nested = entity = Group()
-        elif tag in ("head", "script", "style", "template", "title"):
-            nested = entity = Stub()
-        # normal
-        elif tag in ("ul",):
-            nested = entity = self._get_ul(attrs)
-        elif tag in ("ol",):
-            nested = entity = self._get_ol(attrs)
-        elif tag in ("li",):
-            nested = entity = self._get_li(attrs)
-        elif tag in ("a",):
-            nested = entity = self._get_a(attrs)
-        elif tag in ("b", "strong"):
-            nested = entity = Bold()
-        elif tag in ("i", "em", "cite", "var", "tt"):
-            nested = entity = Italic()
-        elif tag in ("s", "strike", "del"):
-            nested = entity = Strikethrough()
-        elif tag in ("code",):
-            nested = entity = self._get_code(attrs)
-        elif tag in ("kbd", "samp"):
-            nested = entity = Code()
-        elif tag in ("div", "footer", "header", "main", "nav", "section"):
-            nested = entity = Group(block=True)
-        elif tag in ("span",):
-            nested = entity = self._get_span(attrs)
-        elif tag in ("output", "data", "time"):
-            nested = entity = Group()
-        elif tag in ("tg-spoiler",):
-            nested = entity = Spoiler()
-        elif tag in ("tg-emoji",):
-            nested = entity = self._get_tg_emoji(attrs)
-        elif tag in ("p", "summary"):
-            nested = entity = Paragraph()
-        elif tag in ("u", "ins"):
-            nested = entity = Underline()
-        elif tag in ("q",):
-            nested = entity = Quote()
-        elif tag in ("pre",):
-            nested = entity = self._get_pre(attrs)
-        elif tag in ("blockquote",):
-            nested = entity = self._get_blockquote(attrs)
-        elif tag in ("details",):
-            nested = entity = Blockquote(expandable=True)
-        elif tag in ("progress",):
-            nested = entity = self._get_progress(attrs)
-        elif tag in ("meter",):
-            nested = entity = self._get_meter(attrs)
-        elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
-            nested, entity = self._get_h(tag, attrs)
-        elif tag in ("mark",):
-            nested, entity = self._get_mark(attrs)
-        else:
-            raise ValueError(f"Unsupported tag: {tag}")
-        self.current.add(entity)
-        self.entities.append(nested)
+def _no_attrs(factory):
+    return lambda attrs: factory()
 
-    def handle_endtag(self, tag: str) -> None:
-        tag = tag.lower()
-        if tag in NO_CLOSING_TAGS:
-            raise ValueError(f"Invalid closing tag: {tag}")
-        self.entities.pop()
+
+def _add_map_keys(map, keys, default):
+    map.update(dict.fromkeys(keys, default))
