@@ -2,7 +2,7 @@ from pathlib import Path
 
 from sulguk import transform_html
 
-FIXTURES = Path(__file__).parent / "fixtures"
+FIXTURES = Path("tests/fixtures")
 
 
 def test_all_supported_tags_parse():
