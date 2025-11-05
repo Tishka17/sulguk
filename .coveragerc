@@ -6,4 +6,4 @@ source_pkgs = sulguk
 [paths]
 source =
     src/sulguk
-    .venv/lib/*/site-packages/sulguk
+    */site-packages/sulguk
