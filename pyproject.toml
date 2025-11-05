@@ -22,8 +22,7 @@ classifiers = [
 ]
 dependencies = [
     "html5lib~=1.0",
-    "lxml~=6.0",
-    "types-lxml~=2025.0",
+    "lxml>=5.1",
 ]
 [project.optional-dependencies]
 cli = [

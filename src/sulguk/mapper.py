@@ -1,6 +1,6 @@
 import urllib.parse
 from functools import cached_property, partial
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, ParamSpec, Tuple
 
 from .entities import (
     Blockquote,
@@ -29,7 +29,10 @@ from .entities import (
 )
 from .render.numbers import NumberFormat
 
+P = ParamSpec("P")
+
 Attrs = List[Tuple[str, str]]
+EntityPair = Tuple[Optional[Entity], Optional[Entity]]
 
 OL_FORMAT = {
     "1": NumberFormat.DECIMAL,
@@ -41,39 +44,25 @@ OL_FORMAT = {
 
 LANG_CLASS_PREFIX = "language-"
 
-NO_CLOSING_TAGS = ("br", "wbr", "hr", "meta", "link", "img", "input")
-
 
 class Mapper:
-    def __init__(self, base_url: str | None = None) -> None:
+    def __init__(self, base_url: str | None = None):
         self._base_url = base_url
 
-    def match(
-        self,
-        tag: str,
-        attrs: Attrs,
-    ) -> Tuple[Optional[Entity], Optional[Entity]]:
+    def match(self, tag: str, attrs: Attrs) -> EntityPair:
         factory = self._map.get(tag)
         if factory is None:
             raise ValueError(f"Unsupported tag: {tag}")
-        result = factory(attrs)
-        if isinstance(result, tuple):
-            inner, entity = result
-        else:
-            inner = None
-            entity = result
-
+        inner, entity = factory(attrs)
         return inner, entity
 
     @cached_property
-    def _map(
-        self,
-    ) -> dict[str, Callable[[Attrs], Tuple[Entity, Entity] | Entity | None]]:
+    def _map(self) -> dict[str, Callable[[Attrs], EntityPair]]:
         _map = {
             # single tags
-            "br": _no_attrs(NewLine),
-            "wbr": _no_attrs(ZeroWidthSpace),
-            "hr": _no_attrs(HorizontalLine),
+            "br": self._adapt_factory(NewLine),
+            "wbr": self._adapt_factory(ZeroWidthSpace),
+            "hr": self._adapt_factory(HorizontalLine),
             "img": self._get_img,
             "input": self._get_input,
             # paired tags
@@ -84,44 +73,60 @@ class Mapper:
             "code": self._get_code,
             "span": self._get_span,
             "tg-emoji": self._get_tg_emoji,
-            "tg-spoiler": _no_attrs(Spoiler),
+            "tg-spoiler": self._adapt_factory(Spoiler),
             "pre": self._get_pre,
             "blockquote": self._get_blockquote,
-            "details": _no_attrs(partial(Blockquote, expandable=True)),
+            "details": self._adapt_factory(Blockquote, expandable=True),
             "progress": self._get_progress,
             "meter": self._get_meter,
-            "q": _no_attrs(Quote),
+            "q": self._adapt_factory(Quote),
             "mark": self._get_mark,
         }
 
         update_map = partial(_add_map_keys, _map)
-        group_f = _no_attrs(Group)
+        group_f = self._adapt_factory(Group)
 
         # special
-        update_map(("meta", "link"), _no_attrs(lambda: None))
+        update_map(("meta", "link"), self._adapt_factory(lambda: None))
         update_map(("html", "noscript", "body"), group_f)
         update_map(
             ("head", "script", "style", "template", "title"),
-            _no_attrs(Stub),
+            self._adapt_factory(Stub),
         )
         # normal
-        update_map(("b", "strong"), _no_attrs(Bold))
-        update_map(("i", "em", "cite", "var", "tt"), _no_attrs(Italic))
-        update_map(("s", "strike", "del"), _no_attrs(Strikethrough))
-        update_map(("kbd", "samp"), _no_attrs(Code))
+        update_map(("b", "strong"), self._adapt_factory(Bold))
+        update_map(
+            ("i", "em", "cite", "var", "tt"),
+            self._adapt_factory(Italic),
+        )
+        update_map(("s", "strike", "del"), self._adapt_factory(Strikethrough))
+        update_map(("kbd", "samp"), self._adapt_factory(Code))
         update_map(
             ("div", "footer", "header", "main", "nav", "section"),
-            _no_attrs(partial(Group, block=True)),
+            self._adapt_factory(Group, block=True),
         )
         update_map(("output", "data", "time"), group_f)
-        update_map(("p", "summary"), _no_attrs(Paragraph))
-        update_map(("u", "ins"), _no_attrs(Underline))
+        update_map(("p", "summary"), self._adapt_factory(Paragraph))
+        update_map(("u", "ins"), self._adapt_factory(Underline))
 
         # special cases - h1-h6 need tag parameter
-        for h_tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
-            _map[h_tag] = lambda attrs, tag=h_tag: self._get_h(tag, attrs)
+        for tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
+            _map[tag] = partial(self._get_h, tag=tag)
 
         return _map
+
+    def _adapt_factory(
+        self,
+        factory: Callable[P, Optional[Entity]],
+        *args: P.args,
+        **kwargs: P.kwargs,
+    ) -> Callable[[Attrs], EntityPair]:
+        def wrapper(attrs):
+            inner = None
+            entity = factory(*args, **kwargs)
+            return inner, entity
+
+        return wrapper
 
     def _fix_url(self, url: str | None) -> str | None:
         if url is None:
@@ -130,58 +135,58 @@ class Mapper:
             return url
         return urllib.parse.urljoin(self._base_url, url)
 
-    def _find_attr(
-        self,
-        name: str,
-        attrs: Attrs,
-        default: Any = "",
-    ):
+    def _find_attr(self, name: str, attrs: Attrs, default: Any = ""):
         return next((value for key, value in attrs if key == name), default)
 
     def _get_classes(self, attrs: Attrs):
         return self._find_attr("class", attrs).split()
 
-    def _get_a(self, attrs: Attrs) -> Entity:
+    def _get_a(self, attrs: Attrs) -> EntityPair:
+        inner = None
         url = self._find_attr("href", attrs)
         if url:
-            return Link(url=self._fix_url(url))
-        return Group()
+            return inner, Link(url=self._fix_url(url))
+        return inner, Group()
 
-    def _get_img(self, attrs: Attrs) -> Optional[Entity]:
+    def _get_img(self, attrs: Attrs) -> EntityPair:
+        inner = None
         url = self._find_attr("src", attrs)
         text = self._find_attr("alt", attrs, url)
         if not text and not url:
-            return None
+            return inner, None
 
         text_entity = Text(text="🖼️" + text)
         if not url:
-            return text_entity
+            return inner, text_entity
         link = Link(url=self._fix_url(url))
         link.add(text_entity)
-        return link
+        return inner, link
 
-    def _get_input(self, attrs: Attrs) -> Optional[Entity]:
+    def _get_input(self, attrs: Attrs) -> EntityPair:
+        inner = None
         type_ = self._find_attr("type", attrs)
         if type_ == "checkbox":
             checked = self._find_attr("checked", attrs, default=...)
             if checked is ...:
-                return Text(text="◻️")
-            return Text(text="☑️")
+                return inner, Text(text="◻️")
+            return inner, Text(text="☑️")
         if type_ == "radio":
             checked = self._find_attr("checked", attrs, default=...)
             if checked is ...:
-                return Text(text="⚪️")
-            return Text(text="🔘")
+                return inner, Text(text="⚪️")
+            return inner, Text(text="🔘")
 
         value = self._find_attr("value", attrs)
         if value:
-            return Underline(entities=[Text(text=value)])
-        return Text(text="________")
+            return inner, Underline(entities=[Text(text=value)])
+        return inner, Text(text="________")
 
-    def _get_ul(self, attrs: Attrs) -> Entity:
-        return ListGroup(numbered=False)
+    def _get_ul(self, attrs: Attrs) -> EntityPair:
+        inner = None
+        return inner, ListGroup(numbered=False)
 
-    def _get_ol(self, attrs: Attrs) -> Entity:
+    def _get_ol(self, attrs: Attrs) -> EntityPair:
+        inner = None
         start = self._find_attr("start", attrs)
         if not start:
             start = 1
@@ -196,26 +201,28 @@ class Mapper:
         else:
             ol_format = OL_FORMAT[type_]
 
-        return ListGroup(
+        return inner, ListGroup(
             numbered=True,
             start=start,
             format=ol_format,
             reversed=is_reversed is not ...,
         )
 
-    def _get_li(self, attrs: Attrs) -> Entity:
+    def _get_li(self, attrs: Attrs) -> EntityPair:
+        inner = None
         value = self._find_attr("value", attrs)
         if value:
             value = int(value)
         else:
             value = None
-        return ListItem(value=value)
+        return inner, ListItem(value=value)
 
-    def _get_span(self, attrs: Attrs) -> Entity:
+    def _get_span(self, attrs: Attrs) -> EntityPair:
+        inner = None
         classes = self._get_classes(attrs)
         if "tg-spoiler" in classes:
-            return Spoiler()
-        return Group()
+            return inner, Spoiler()
+        return inner, Group()
 
     def _get_language_class(self, attrs: Attrs):
         classes = self._get_classes(attrs)
@@ -228,24 +235,27 @@ class Mapper:
             None,
         )
 
-    def _get_code(self, attrs: Attrs) -> Entity:
-        return Code(language=self._get_language_class(attrs))
+    def _get_code(self, attrs: Attrs) -> EntityPair:
+        inner = None
+        return inner, Code(language=self._get_language_class(attrs))
 
-    def _get_pre(self, attrs: Attrs) -> Entity:
-        return Pre(language=self._get_language_class(attrs))
+    def _get_pre(self, attrs: Attrs) -> EntityPair:
+        inner = None
+        return inner, Pre(language=self._get_language_class(attrs))
 
-    def _get_blockquote(self, attrs: Attrs) -> Entity:
-        return Blockquote(
+    def _get_blockquote(self, attrs: Attrs) -> EntityPair:
+        inner = None
+        return inner, Blockquote(
             expandable=self._find_attr("expandable", attrs, None) == "",
         )
 
-    def _get_mark(self, attrs: Attrs):
+    def _get_mark(self, attrs: Attrs) -> EntityPair:
         inner = Group()
         entity = Group()
         entity.add(Italic(entities=[Bold(entities=[inner])]))
         return inner, entity
 
-    def _get_h(self, tag: str, attrs: Attrs):
+    def _get_h(self, attrs: Attrs, tag: str) -> EntityPair:
         inner = Group()
         entity = Group(block=True)
         entity.add(Paragraph())
@@ -269,31 +279,30 @@ class Mapper:
             entity.add(Italic(entities=[inner]))
         return inner, entity
 
-    def _get_progress(self, attrs: Attrs) -> Entity:
-        return Progress(
+    def _get_progress(self, attrs: Attrs) -> EntityPair:
+        inner = None
+        return inner, Progress(
             value=float(self._find_attr("value", attrs, "0")),
             max=float(self._find_attr("max", attrs, "1")),
             is_meter=False,
         )
 
-    def _get_meter(self, attrs: Attrs) -> Entity:
-        return Progress(
+    def _get_meter(self, attrs: Attrs) -> EntityPair:
+        inner = None
+        return inner, Progress(
             value=float(self._find_attr("value", attrs, "0")),
             min=float(self._find_attr("min", attrs, "0")),
             max=float(self._find_attr("max", attrs, "1")),
             is_meter=True,
         )
 
-    def _get_tg_emoji(self, attrs: Attrs) -> Entity:
+    def _get_tg_emoji(self, attrs: Attrs) -> EntityPair:
+        inner = None
         emoji_id = self._find_attr("emoji-id", attrs)
         if emoji_id:
-            return Emoji(custom_emoji_id=emoji_id)
+            return inner, Emoji(custom_emoji_id=emoji_id)
         else:
-            return Group()
-
-
-def _no_attrs(factory):
-    return lambda attrs: factory()
+            return inner, Group()
 
 
 def _add_map_keys(map, keys, default):
