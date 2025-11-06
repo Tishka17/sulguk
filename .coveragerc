@@ -1,9 +1,7 @@
+[report]
+exclude_lines = 
+    pragma: not covered
+    @overload
 [run]
-branch = True
 relative_files = True
-source_pkgs = sulguk
-
-[paths]
-source =
-    src/sulguk
-    */site-packages/sulguk
+branch = True
