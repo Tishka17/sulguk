@@ -1,0 +1,7 @@
+[report]
+exclude_lines = 
+    pragma: not covered
+    @overload
+[run]
+relative_files = True
+branch = True
