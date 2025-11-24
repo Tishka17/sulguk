@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Supported Tags Test Page</title>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      console.log('test')
+    </script>
+    <style>
+      .test {
+        color: red;
+      }
+    </style>
+    <template><div>template content</div></template>
+  </head>
+  <body>
+    <header>
+      <h1>Main Heading H1</h1>
+      <h2>Subheading H2</h2>
+      <h3>Subheading H3</h3>
+      <h4>Subheading H4</h4>
+      <h5>Subheading H5</h5>
+      <h6>Subheading H6</h6>
+    </header>
+
+    <nav>
+      <a href="https://example.com">Link with href</a>
+      <a>Link without href</a>
+    </nav>
+
+    <main>
+      <section>
+        <p>
+          Paragraph with <b>bold</b>, <strong>strong</strong>, <i>italic</i>, <em>emphasis</em>, <u>underline</u>,
+          <ins>inserted</ins>, <s>strikethrough</s>, <strike>strike</strike>, <del>deleted</del> text.
+        </p>
+
+        <p>
+          More formatting: <cite>citation</cite>, <var>variable</var>, <tt>teletype</tt>, <kbd>keyboard</kbd>,
+          <samp>sample</samp>, <code>inline code</code>, <code class="language-python">python code</code>.
+        </p>
+
+        <div>Division block</div>
+        <span>Plain span</span>
+        <span class="tg-spoiler">Spoiler span</span>
+
+        <blockquote>Simple blockquote</blockquote>
+        <blockquote expandable>Expandable blockquote</blockquote>
+        <details>Details blockquote</details>
+
+        <q>Quote element</q>
+        <mark>Marked text</mark>
+
+        <pre>Preformatted text</pre>
+        <pre class="language-javascript">const x = 42;</pre>
+
+        <tg-spoiler>Telegram spoiler</tg-spoiler>
+        <tg-emoji emoji-id="12345">😀</tg-emoji>
+        <tg-emoji>No emoji id</tg-emoji>
+
+        <br />
+        <wbr />
+        <hr />
+
+        <img src="https://example.com/image.png" alt="Test Image" />
+        <img alt="Image without src" />
+        <img src="https://example.com/nosrc.png" />
+        <img />
+
+        <ul>
+          <li>Unordered item 1</li>
+          <li>Unordered item 2</li>
+        </ul>
+
+        <ol>
+          <li>Ordered item 1</li>
+          <li>Ordered item 2</li>
+          <li value="10">Item with value</li>
+        </ol>
+
+        <ol start="5">
+          <li>Starting from 5</li>
+        </ol>
+
+        <ol type="a">
+          <li>Lowercase letters</li>
+        </ol>
+
+        <ol type="A">
+          <li>Uppercase letters</li>
+        </ol>
+
+        <ol type="i">
+          <li>Lowercase roman</li>
+        </ol>
+
+        <ol type="I">
+          <li>Uppercase roman</li>
+        </ol>
+
+        <ol reversed>
+          <li>Reversed list</li>
+        </ol>
+
+        <input type="checkbox" />
+        <input type="checkbox" checked />
+        <input type="radio" />
+        <input type="radio" checked />
+        <input type="text" value="Test Value" />
+        <input type="text" />
+        <input type="submit" value="Submit" />
+
+        <progress value="0.7" max="1"></progress>
+        <progress value="30" max="100"></progress>
+
+        <meter value="0.6" min="0" max="1"></meter>
+        <meter value="75" min="0" max="100"></meter>
+
+        <output>Output text</output>
+        <data value="12345">Data element</data>
+        <time datetime="2024-01-01">Time element</time>
+
+        <noscript>JavaScript disabled message</noscript>
+
+        <!-- HTML comment that should be skipped -->
+
+        <footer>
+          <p>Footer paragraph with <a href="/relative">relative link</a></p>
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>

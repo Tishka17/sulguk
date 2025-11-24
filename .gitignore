@@ -1,6 +1,20 @@
-__pycache__
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
 .idea/*
-*.egg-info
+.vscode
+.DS_Store
 
-build/*
+*.egg-info
+/dist
+/build
+*.egg
+
+.pytest_cache/
+.tox/
+.coverage
+.mypy_cache/
+.ruff_cache/
+.dmypy.json

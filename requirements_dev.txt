@@ -1,3 +1,5 @@
 ruff==0.12.*
 pytest
+pytest-cov
+types-lxml
 aiogram
