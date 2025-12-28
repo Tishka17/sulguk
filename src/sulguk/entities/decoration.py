@@ -121,9 +121,12 @@ class Pre(DecoratedEntity):
         return nested.language
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
-        return MessageEntity(
+        entity = MessageEntity(
             type="pre",
             offset=offset,
             length=length,
-            language=self._get_language(),
         )
+        language = self._get_language()
+        if language:
+            entity["language"] = language
+        return entity
