@@ -126,7 +126,6 @@ class Pre(DecoratedEntity):
             offset=offset,
             length=length,
         )
-        language = self._get_language()
-        if language:
+        if language := self._get_language():
             entity["language"] = language
         return entity
