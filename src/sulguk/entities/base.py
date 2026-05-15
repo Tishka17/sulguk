@@ -15,6 +15,13 @@ class Entity(ABC):
     def render(self, state: State) -> None:
         raise NotImplementedError
 
+    def is_whitespace_only(self) -> bool:
+        return False
+
+    def render_list_start(self, state: State) -> bool:
+        self.render(state)
+        return False
+
 
 @dataclass
 class Group(Entity):
@@ -32,6 +39,15 @@ class Group(Entity):
         if self.block:
             state.canvas.add_new_line_soft()
 
+    def render_list_start(self, state: State) -> bool:
+        if not self.block:
+            self.render(state)
+            return False
+
+        render_list_start_entities(self.entities, state)
+        state.canvas.add_new_line_soft()
+        return False
+
 
 @dataclass
 class DecoratedEntity(Group):
@@ -45,3 +61,33 @@ class DecoratedEntity(Group):
         entity = self._get_entity(offset, state.canvas.size - offset)
         if entity:
             state.entities.append(entity)
+
+    def render_list_start(self, state: State) -> bool:
+        self.render(state)
+        return False
+
+
+def render_list_start_entities(
+    entities: List[Entity],
+    state: State,
+) -> None:
+    first_index = _first_meaningful_index(entities)
+    if first_index is None:
+        return
+
+    first_entity = entities[first_index]
+    flattened = first_entity.render_list_start(state)
+    rest = entities[first_index + 1 :]
+    if flattened and _first_meaningful_index(rest) is not None:
+        state.canvas.add_new_line_soft()
+
+    for entity in rest:
+        entity.render(state)
+
+
+def _first_meaningful_index(entities: List[Entity]) -> Optional[int]:
+    for index, entity in enumerate(entities):
+        if entity.is_whitespace_only():
+            continue
+        return index
+    return None

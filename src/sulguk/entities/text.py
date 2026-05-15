@@ -13,3 +13,6 @@ class Text(Entity):
 
     def add(self, entity: Entity):
         raise ValueError("Text does not supports children")
+
+    def is_whitespace_only(self) -> bool:
+        return not self.text.strip()
