@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from sulguk.data import NumberFormat
 from sulguk.render import State, int_to_number
-from .base import Entity, Group
+from .base import Entity, Group, render_list_start_entities
 
 
 @dataclass
@@ -49,5 +49,7 @@ class ListItem(Group):
     def render(self, state: State) -> None:
         indent = state.canvas.indent
         state.canvas.indent += 1
-        super().render(state)
-        state.canvas.indent = indent
+        try:
+            render_list_start_entities(self.entities, state)
+        finally:
+            state.canvas.indent = indent

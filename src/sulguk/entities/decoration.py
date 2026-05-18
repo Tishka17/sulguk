@@ -12,7 +12,10 @@ class Link(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="text_link", url=self.url, offset=offset, length=length,
+            type="text_link",
+            url=self.url,
+            offset=offset,
+            length=length,
         )
 
 
@@ -38,7 +41,9 @@ class Underline(DecoratedEntity):
 class Strikethrough(DecoratedEntity):
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="strikethrough", offset=offset, length=length,
+            type="strikethrough",
+            offset=offset,
+            length=length,
         )
 
 
@@ -54,7 +59,9 @@ class Code(DecoratedEntity):
 
     def _get_entity(self, offset: int, length: int) -> MessageEntity:
         return MessageEntity(
-            type="code", offset=offset, length=length,
+            type="code",
+            offset=offset,
+            length=length,
         )
 
 
@@ -95,6 +102,11 @@ class Paragraph(Group):
         state.canvas.add_empty_line()
         super().render(state)
         state.canvas.add_empty_line()
+
+    def render_list_start(self, state: State) -> bool:
+        for child in self.entities:
+            child.render(state)
+        return any(not child.is_whitespace_only() for child in self.entities)
 
 
 @dataclass
