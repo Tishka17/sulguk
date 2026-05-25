@@ -22,6 +22,18 @@ from aiogram.types import (
     InlineQueryResultArticle,
 )
 
+try:
+    from aiogram.methods import AnswerGuestQuery
+except ImportError:
+    class AnswerGuestQuery(TelegramMethod):
+        pass
+
+try:
+    from aiogram.methods import SendMessageDraft
+except ImportError:
+    class SendMessageDraft(TelegramMethod):
+        pass
+
 from sulguk.data import SULGUK_PARSE_MODE
 from .wrapper import transform_html
 
@@ -39,6 +51,8 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             AnswerWebAppQuery: self._process_answer_web_app_query,
             AnswerInlineQuery: self._process_answer_inline_query,
             SendPoll: self._process_send_poll,
+            SendMessageDraft: self._process_send_message_draft,
+            AnswerGuestQuery: self._process_answer_guest_query,
         }
         self._base_url = base_url
 
@@ -71,6 +85,16 @@ class AiogramSulgukMiddleware(BaseRequestMiddleware):
             self, method: AnswerWebAppQuery, bot: Bot,
     ) -> None:
         self._process_inline_query_result(method.result, bot)
+
+    def _process_answer_guest_query(
+            self, method: AnswerGuestQuery, bot: Bot,
+    ) -> None:
+        self._process_inline_query_result(method.result, bot)
+
+    def _process_send_message_draft(
+            self, method: SendMessageDraft, bot: Bot,
+    ) -> None:
+        self._transform_text_caption(method, bot)
 
     def _process_edit_message_media(
             self, method: EditMessageMedia, bot: Bot,
