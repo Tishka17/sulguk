@@ -1,7 +1,12 @@
 from enum import Enum
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict, get_args
 
 SULGUK_PARSE_MODE = "sulguk"
+# class of ``<pre>`` and ``<code>`` with the language: ``language-python``
+LANG_CLASS_PREFIX = "language-"
+
+RichFormat = Literal["html", "blocks"]
+RICH_FORMATS = get_args(RichFormat)
 
 
 class NumberFormat(Enum):

@@ -2,6 +2,60 @@ from sulguk import transform_html
 from sulguk.data import MessageEntity
 
 
+def test_ordered_list_default_numbers():
+    result = transform_html("<ol><li><b>a</b></li><li>b</li></ol>")
+
+    assert result.text == "1. a\n2. b\n"
+    assert result.entities == [MessageEntity(type="bold", offset=3, length=1)]
+
+
+def test_ordered_list_start():
+    result = transform_html('<ol start="3"><li><b>a</b></li><li>b</li></ol>')
+
+    assert result.text == "3. a\n4. b\n"
+    assert result.entities == [MessageEntity(type="bold", offset=3, length=1)]
+
+
+def test_ordered_list_start_and_value():
+    result = transform_html(
+        '<ol start="3"><li><b>a</b></li><li value="10"><b>b</b></li>'
+        "<li>c</li></ol>",
+    )
+
+    assert result.text == "3. a\n10. b\n11. c\n"
+    assert result.entities == [
+        MessageEntity(type="bold", offset=3, length=1),
+        MessageEntity(type="bold", offset=9, length=1),
+    ]
+
+
+def test_ordered_list_reversed():
+    result = transform_html(
+        "<ol reversed><li>a</li><li><b>b</b></li><li>c</li></ol>",
+    )
+
+    assert result.text == "3. a\n2. b\n1. c\n"
+    assert result.entities == [MessageEntity(type="bold", offset=8, length=1)]
+
+
+def test_ordered_list_reversed_start():
+    result = transform_html(
+        '<ol reversed start="7"><li>a</li><li><b>b</b></li></ol>',
+    )
+
+    assert result.text == "7. a\n6. b\n"
+    assert result.entities == [MessageEntity(type="bold", offset=8, length=1)]
+
+
+def test_ordered_list_reversed_value():
+    result = transform_html(
+        '<ol reversed><li>a</li><li value="9"><b>b</b></li><li>c</li></ol>',
+    )
+
+    assert result.text == "3. a\n9. b\n8. c\n"
+    assert result.entities == [MessageEntity(type="bold", offset=8, length=1)]
+
+
 def test_ordered_list_item_first_paragraph_stays_with_marker():
     result = transform_html(
         "<ol>"

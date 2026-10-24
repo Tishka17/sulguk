@@ -12,32 +12,34 @@ class ListGroup(Entity):
     numbered: bool = False
     reversed: bool = False
     format: NumberFormat = NumberFormat.DECIMAL
-    start: int = 1
+    start: Optional[int] = None
 
     def add(self, entity: Entity):
         self.entities.append(entity)
 
+    def _first_number(self) -> int:
+        if self.start is not None:
+            return self.start
+        if self.reversed:
+            return sum(isinstance(e, ListItem) for e in self.entities)
+        return 1
+
     def render(self, state: State) -> None:
         state.canvas.add_new_line_soft()
-        if self.reversed:
-            index = len(self.entities)
-            step = -1
-        else:
-            index = 0
-            step = 1
+        number = self._first_number()
+        step = -1 if self.reversed else 1
         for entity in self.entities:
             if isinstance(entity, ListItem):
                 if entity.value is not None:
-                    index = entity.value
-                else:
-                    index += step
+                    number = entity.value
 
                 if self.numbered:
-                    index_value = int_to_number(index, self.format)
+                    index_value = int_to_number(number, self.format)
                     mark = f"{index_value}. "
                 else:
                     mark = "• "
                 state.canvas.add_text(mark)
+                number += step
             entity.render(state)
             state.canvas.add_new_line_soft()
 
