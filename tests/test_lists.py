@@ -1,3 +1,5 @@
+import pytest
+
 from sulguk import transform_html
 from sulguk.data import MessageEntity
 
@@ -128,3 +130,62 @@ def test_blockquote_list_item_keeps_entity():
     assert result.entities == [
         MessageEntity(type="blockquote", offset=3, length=5),
     ]
+
+
+@pytest.mark.parametrize("start", [5, 0, -2, 1])
+@pytest.mark.parametrize("reversed_", [False, True])
+def test_ordered_list_honors_start(start, reversed_):
+    reversed_attr = " reversed" if reversed_ else ""
+    result = transform_html(
+        f'<ol start="{start}"{reversed_attr}>'
+        "<li>first</li><li>second</li><li>third</li></ol>",
+    )
+    step = -1 if reversed_ else 1
+    assert result.text == (
+        f"{start}. first\n{start + step}. second\n"
+        f"{start + 2 * step}. third\n"
+    )
+
+
+def test_reversed_list_counts_only_its_list_items():
+    result = transform_html(
+        "<ol reversed>\n"
+        "<li>first<ul><li>nested</li></ul></li>\n"
+        "<li>second</li>\n"
+        "</ol>",
+    )
+    assert result.text == "2. first\n\xa0• nested\n1. second\n"
+
+
+@pytest.mark.parametrize("reversed_", [False, True])
+def test_list_item_value_resets_following_numbers(reversed_):
+    reversed_attr = " reversed" if reversed_ else ""
+    result = transform_html(
+        f'<ol start="5"{reversed_attr}>'
+        '<li>first</li><li value="10">reset</li><li>last</li></ol>',
+    )
+    following = 9 if reversed_ else 11
+    assert result.text == f"5. first\n10. reset\n{following}. last\n"
+
+
+@pytest.mark.parametrize(
+    "style, first, second",
+    [("a", "a", "b"), ("A", "A", "B"),
+     ("i", "i", "ii"), ("I", "I", "II")],
+)
+@pytest.mark.parametrize(
+    "attrs, expected",
+    [
+        ('start="-2"', "-2. first\n-1. second\n0. third\n"),
+        ('start="0"', "0. first\n{first}. second\n{second}. third\n"),
+        ('start="1" reversed', "{first}. first\n0. second\n-1. third\n"),
+    ],
+)
+def test_nonpositive_list_ordinals_use_decimal(
+    style, first, second, attrs, expected,
+):
+    result = transform_html(
+        f'<ol type="{style}" {attrs}>'
+        "<li>first</li><li>second</li><li>third</li></ol>",
+    )
+    assert result.text == expected.format(first=first, second=second)

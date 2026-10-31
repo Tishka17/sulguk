@@ -12,19 +12,23 @@ class ListGroup(Entity):
     numbered: bool = False
     reversed: bool = False
     format: NumberFormat = NumberFormat.DECIMAL
-    start: int = 1
+    start: Optional[int] = 1
 
     def add(self, entity: Entity):
         self.entities.append(entity)
 
     def render(self, state: State) -> None:
         state.canvas.add_new_line_soft()
-        if self.reversed:
-            index = len(self.entities)
-            step = -1
-        else:
-            index = 0
-            step = 1
+        step = -1 if self.reversed else 1
+        start = self.start
+        if start is None:
+            if self.reversed:
+                start = sum(
+                    isinstance(entity, ListItem) for entity in self.entities
+                )
+            else:
+                start = 1
+        index = start - step
         for entity in self.entities:
             if isinstance(entity, ListItem):
                 if entity.value is not None:
@@ -33,7 +37,10 @@ class ListGroup(Entity):
                     index += step
 
                 if self.numbered:
-                    index_value = int_to_number(index, self.format)
+                    index_value = (
+                        int_to_number(index, self.format)
+                        if index > 0 else str(index)
+                    )
                     mark = f"{index_value}. "
                 else:
                     mark = "• "
