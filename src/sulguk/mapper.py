@@ -189,7 +189,7 @@ class Mapper:
         inner = None
         start = self._find_attr("start", attrs)
         if not start:
-            start = 1
+            start = None
         else:
             start = int(start)
 
